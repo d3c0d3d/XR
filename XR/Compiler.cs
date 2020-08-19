@@ -71,10 +71,7 @@ namespace XR
             string code,
             CSharpCompilationOptions compilerOptions = null,
             IEnumerable<MetadataReference> references = null)
-        {
-
-            //var dotNetCoreDir = Path.GetDirectoryName(typeof(object).GetTypeInfo().Assembly.Location);
-
+        {   
             // create the syntax tree
             SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, null, string.Empty);
 
