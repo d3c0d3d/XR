@@ -72,7 +72,6 @@ namespace XR
             CSharpCompilationOptions compilerOptions = null,
             IEnumerable<MetadataReference> references = null)
         {
-
             //var dotNetCoreDir = Path.GetDirectoryName(typeof(object).GetTypeInfo().Assembly.Location);
 
             // create the syntax tree
