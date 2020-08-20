@@ -10,8 +10,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using System.Runtime.Loader;
 
-namespace XR
+namespace XR.Core
 {
     public class Compiler
     {
@@ -75,6 +77,8 @@ namespace XR
             // create the syntax tree
             SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, null, string.Empty);
 
+            var dotNetCoreDir = Path.GetDirectoryName(typeof(object).GetTypeInfo().Assembly.Location);
+
             // get the reference to mscore library
             MetadataReference mscoreLibRef =
                 AssemblyMetadata.CreateFromFile(typeof(object).Assembly.Location).GetReference();
@@ -82,13 +86,13 @@ namespace XR
             MetadataReference consoleRef =
                 AssemblyMetadata.CreateFromFile(typeof(Console).Assembly.Location).GetReference();
 
-            //MetadataReference runtimeRef =
-            //    MetadataReference.CreateFromFile(Path.Combine(dotNetCoreDir, "System.Runtime.dll"));
+            MetadataReference runtimeRef =
+               MetadataReference.CreateFromFile(Path.Combine(dotNetCoreDir, "System.Runtime.dll"));
 
             // create the allReferences collection consisting of 
             // mscore reference and all the references passed to the method
             IEnumerable<MetadataReference> allReferences =
-                new MetadataReference[] { mscoreLibRef, consoleRef/*, runtimeRef*/ };
+                new MetadataReference[] { mscoreLibRef, consoleRef, runtimeRef};
             if (references != null)
             {
                 allReferences = allReferences.Concat(references);
@@ -124,28 +128,62 @@ namespace XR
             byte[] result = mainCompilation.EmitToArray();
 
             // Load the resulting assembly into the domain. 
-            Assembly assembly = Assembly.Load(result);
+            //Assembly assembly = Assembly.Load(result);
+            var asm = new AssemblyLoaderContext();
+            asm.Resolving += ResolvingHandler;
+            var assembly = asm.LoadFromStream(new MemoryStream(result));
 
+            var entry = assembly.EntryPoint;
+            entry.Invoke(null, null);
             // load the A.netmodule and B.netmodule into the assembly.
 
-            foreach (var src in SourceList)
-            {
-                if (src.AssemblyName.ToLower() != "program")
-                    assembly.LoadModule($"{src.AssemblyName}.netmodule",src.EmitResult);
-            }
+            //foreach (var src in SourceList)
+            //{
+               // if (src.AssemblyName.ToLower() != "program")
+                  //  asm.LoadFromStream(new MemoryStream(src.EmitResult));
+                    //assembly.LoadModule($"{src.AssemblyName}.netmodule",src.EmitResult);
+           /// }
             
             // get the type Program from the assembly
-            Type programType = assembly.GetType("Program");
+            //Type programType = asm.GetType("Program");
 
             // Get the static Main() method info from the type
-            MethodInfo method = programType.GetMethod("Main");
+            //MethodInfo method = programType.GetMethod("Main");
 
             // invoke Program.Main() static method
-            method.Invoke(null, null);
+            //method.Invoke(null, null);
 
             return this;
         }
+        private Assembly ResolvingHandler(AssemblyLoadContext context, AssemblyName assemblyName)
+        {
+            var assembly = context.LoadFromAssemblyName(assemblyName);
+            Console.WriteLine("Resolving: " + assemblyName.FullName);
+            return assembly;
+        }
     }
+
+   internal class AssemblyLoaderContext : AssemblyLoadContext
+    {
+        //private AssemblyDependencyResolver _resolver;
+
+        //public AssemblyLoaderContext(string mainAssemblyToLoadPath) : base(isCollectible: true)
+        //{
+        //    //_resolver = new AssemblyDependencyResolver(mainAssemblyToLoadPath);
+        //}
+
+        protected override Assembly Load(AssemblyName name)
+        {
+            //string assemblyPath = _resolver.ResolveAssemblyToPath(name);
+            //if (assemblyPath != null)
+            //{
+            //    return LoadFromAssemblyPath(assemblyPath);
+            //}
+
+            return null;
+        }
+    }
+
     internal static class CompilerEx
     {
         // emit the compilation result into a byte array.
