@@ -1,6 +1,7 @@
 ﻿using System;
+using XR.Core;
 
-namespace XR
+namespace XR.App
 {
     class Program
     {
@@ -9,14 +10,15 @@ namespace XR
             Console.WriteLine("Start Test");
 
             var classAString =
-                @"public class A 
+                @"using System;
+                    public class A 
                     {
                         public static string Print() 
                         { 
                             return ""Hello "";
                         }
                     }";
-            
+
             var classBString =
                 @"public class B : A
                     {
@@ -27,13 +29,15 @@ namespace XR
                     }";
 
             var programStr =
-                @"System.Console.Write(A.Print()); 
-                  System.Console.WriteLine(B.Print());";
+                @"Console.Write(A.Print()); 
+                  Console.WriteLine(B.Print());";
+            var testFullStr = $"{classAString}\n{classBString}\n{Templates.MainProgramStr.Replace("{code}",programStr)}";
 
             _ = new Compiler()
-                .AddSource("A", classAString)
-                .AddSource("B", classBString, "A")
-                .AddSource("program", Templates.MainProgramStr.Replace("{code}",programStr), "A","B")
+                //.AddSource("A", classAString)
+         //       .AddSource("B", classBString, "A")
+             //   .AddSource("program", Templates.MainProgramStr.Replace("{code}", programStr), "A", "B")
+                .AddSource("program", testFullStr)
                 .Build()
                 .Run();
 

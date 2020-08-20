@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XR
+namespace XR.Core
 {
     public static class Util
     {
