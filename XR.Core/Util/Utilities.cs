@@ -5,11 +5,11 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XR.Core
+namespace XR.Core.Util
 {
-    public static class Util
+    public static class Utilities
     {
-        public static async Task<string> HttpGetForLargeFile(string url)
+        public static async Task<string> GetTextFileAsync(string url)
         {
             using (var httpClient = new HttpClient())
             {
@@ -20,9 +20,9 @@ namespace XR.Core
                         contentStream.Position = 0;
                         var sr = new StreamReader(contentStream);
                         return sr.ReadToEnd();
-                    }                        
-                }                
-            }            
+                    }
+                }
+            }
         }
     }
 }

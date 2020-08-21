@@ -1,5 +1,6 @@
 ﻿using System;
-using XR.Core;
+using XR.Core.OptionCommand;
+using static XR.Core.Util.ConsoleHelpers;
 
 namespace XR.App
 {
@@ -7,41 +8,33 @@ namespace XR.App
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Start Test");
+            CenterConsole();
 
-            var classAString =
-                @"using System;
-                    public class A 
-                    {
-                        public static string Print() 
-                        { 
-                            return ""Hello "";
-                        }
-                    }";
+            SetTitle($"{Common.KIND_APPNAME} - {Common.KIND_VERSION}");
+            Common.PrintBrand();
 
-            var classBString =
-                @"public class B : A
-                    {
-                        public static string Print()
-                        { 
-                            return ""World!"";
-                        }
-                    }";
+            OptionCommands.Startup();
 
-            var programStr =
-                @"Console.Write(A.Print()); 
-                  Console.WriteLine(B.Print());";
-            var testFullStr = $"{classAString}\n{classBString}\n{Templates.MainProgramStr.Replace("{code}",programStr)}";
-
-            _ = new Compiler()
-                //.AddSource("A", classAString)
-         //       .AddSource("B", classBString, "A")
-             //   .AddSource("program", Templates.MainProgramStr.Replace("{code}", programStr), "A", "B")
-                .AddSource("program", testFullStr)
-                .Build()
-                .Run();
-
-            Console.ReadKey();
+            while (true)
+            {
+                try
+                {
+                    OptionCommands.Idle();
+                    OptionCommands.Execute(ShellArgs());
+                }
+                catch (OptionException e)
+                {
+                    PrintErrorMessage(e);
+                }                
+                catch (System.IO.FileNotFoundException e)
+                {
+                    PrintErrorMessage(e);
+                }
+                catch (Exception e)
+                {
+                    PrintError(e);
+                }
+            }
 
         }
     }
