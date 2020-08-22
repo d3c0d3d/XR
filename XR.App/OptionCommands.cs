@@ -34,12 +34,12 @@ namespace XR.App
         private static void CreateCommands()
         {
             _optionSet = new OptionSet()
-                .Add("run=", "Run file", Main.RunFile)
+                .Add("run=", "Download/Compile and Run File", Main.RunFile)
                 .Add("cls", "Clear Screen", _ =>
                 {
                     Console.Clear();
                 })
-                .Add("exit", "Exit Application/Client Session", _ => Main.Exit())
+                .Add("exit", "Exit Application", _ => Main.Exit())
                 .Add("?", "Show All Commands", _ => Main.ShowHelp(_optionSet));
         }
     }
