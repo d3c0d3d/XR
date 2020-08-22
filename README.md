@@ -6,5 +6,5 @@ C# Code Script Compiler and Runner from Web or Local
 
 ### Example
 ```
-run=https://pastebin.com/raw/9vSFUPwX
+run=https://pastebin.com/raw/CwicAkSV
 ```
