@@ -78,6 +78,7 @@ namespace XR.App
         private static string GetFileRaw(string location)
         {
             string sourceContent;
+            location = location.TrimEx();
             if (location.ContainsAny("http://", "https://"))
             {
                 PrintLnC($"{location} Downloading...",ConsoleColor.White);
@@ -85,6 +86,9 @@ namespace XR.App
             }
             else
             {
+                if (!location.EndsWith(".xr"))
+                    throw new OptionException("extension (.xr) mandatory", string.Empty);
+
                 sourceContent = File.ReadAllText(location);
             }
 
