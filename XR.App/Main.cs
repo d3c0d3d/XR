@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using XR.Kernel;
 using XR.Kernel.OptionCommand;
 using XR.Kernel.Extensions;
@@ -23,23 +21,28 @@ namespace XR.App
             string source = ParseFile(rawData);
 
             PrintLn($"{location} Compiling...");
+            _ = new Compiler().Build("program", source).Run();
 
-            _ = new Compiler()                
-                .AddSource("program", source)
-                .Build()
-                .Run();
+            //var file = Path.Combine(AppContext.BaseDirectory, "program.dll");
+            //if (File.Exists(file))
+            //    File.Delete(file);
+            //PrintLn($"{file} saved!");
+
+            //File.WriteAllBytes(file, compiler.SourceDetail.BuildCode);
+
         }
 
         private static string ParseFile(string file)
         {
             var cacheFile = file;
 
-            var extrated = Regex.Split(file, _regexGetKeys);
-            extrated = extrated.Where(x => !x.IsNull()).ToArray();
+            var extrateds = Regex.Split(file, _regexGetKeys);
+            var extrated = extrateds.Where(x => !x.IsNull()).ToArray().FirstOrDefault();
+            // remove extrated part
+            cacheFile = cacheFile.Replace(extrated, string.Empty);
+            extrated = extrated.TrimStart();
 
-            cacheFile = cacheFile.Replace(extrated.FirstOrDefault(), string.Empty);
-
-            var fmtSource = Templates.MainProgramStr.Replace("{code}", extrated.FirstOrDefault());
+            var fmtSource = Templates.MainProgramStr.Replace("{code}", extrated.Replace("\r\n", "\r\n         "));
 
             var finalSource = $"{cacheFile}\n{fmtSource}";
 
