@@ -1,6 +1,6 @@
 ﻿using System;
-using XR.Core.OptionCommand;
-using static XR.Core.Util.ConsoleHelpers;
+using XR.Kernel.OptionCommand;
+using static XR.Kernel.Util.ConsoleHelpers;
 
 namespace XR.App
 {

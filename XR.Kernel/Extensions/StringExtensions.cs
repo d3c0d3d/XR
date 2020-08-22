@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace XR.Core.Extensions
+namespace XR.Kernel.Extensions
 {
     public static class StringExtensions
     {

@@ -1,4 +1,4 @@
-﻿namespace XR.Core.Logging
+﻿namespace XR.Kernel.Logging
 {
     /// <summary>
     /// Specifies the logging level.

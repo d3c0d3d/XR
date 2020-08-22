@@ -1,4 +1,4 @@
-﻿namespace XR.Core
+﻿namespace XR.Kernel
 {
     public static class Templates
     {

@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\XR.Core\XR.Core.csproj" />
+    <ProjectReference Include="..\XR.Kernel\XR.Kernel.csproj" />
   </ItemGroup>
 
 </Project>
