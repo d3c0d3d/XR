@@ -1,6 +1,6 @@
 # XR - Experimental Runtime
 
-C# Code Script Compiler and Runner from Web or Local
+Runtime Experimental that downloads/compile and executes C# codes modified named (.xr) in a decentralized way from a single file or url
 
 ## Usage
 
