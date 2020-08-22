@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
-using Microsoft.CodeAnalysis.Text;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using XR.Kernel.Util;
 using System.Runtime.Loader;
@@ -19,71 +14,25 @@ namespace XR.Kernel
 {
     public class Compiler
     {
-        private List<SourceDetail> SourceList = new List<SourceDetail>();
+        public SourceDetail SourceDetail { get; private set; }
 
-        public Compiler AddSource(string assemblyName, string sourceCode, params string[] moduleRef)
+        public Compiler Build(string assemblyName, string sourceCode, params string[] moduleRef)
         {
-            SourceList.Add(new SourceDetail(assemblyName, sourceCode, moduleRef));
-            return this;
-        }
+            SourceDetail = new SourceDetail(assemblyName, sourceCode, moduleRef);
 
-        public Compiler Build()
-        {
-            foreach (var source in SourceList)
-            {
-                var compilation =
-                CreateCompilationWithMscorlib(
-                    source.AssemblyName,
-                    source.SourceCode,
-                    new CSharpCompilationOptions(OutputKind.NetModule),
-                    GetRefs(source.ModuleRef)
-                );
+            var compResult = GenerateCode(SourceDetail.AssemblyName, SourceDetail.SourceCode, GetRefs(SourceDetail.ModuleRef));
 
-                byte[] emitResult = compilation.EmitToArray();
+            byte[] emitResult = compResult.EmitToArray();
 
-                // update
-                source.EmitResult = emitResult;
-
-                MetadataReference metaRef = ModuleMetadata.CreateFromImage(emitResult)
-                    .GetReference(display: $"{source.AssemblyName}.netmodule");
-
-                // update
-                source.MetaRef = metaRef;
-            }
+            // update
+            SourceDetail.BuildCode = emitResult;
 
             return this;
         }
 
         public Compiler Run()
         {
-            var programDetail = SourceList.LastOrDefault();
-
-            var mainCompilation =
-                CreateCompilationWithMscorlib
-                (
-                    programDetail.AssemblyName,
-                    programDetail.SourceCode,
-                    // note that here we pass the OutputKind set to ConsoleApplication
-                    new CSharpCompilationOptions(OutputKind.ConsoleApplication),
-                    GetRefs(programDetail.ModuleRef)
-                );
-
-            // Emit the byte result of the compilation
-            byte[] result = mainCompilation.EmitToArray();
-
-            //// Load the resulting assembly into the domain. 
-            ////Assembly assembly = Assembly.Load(result);
-            //var assemblyLoader = new AssemblyLoaderContext();
-
-            //var assembly = assemblyLoader.LoadFromStream(new MemoryStream(result));
-
-            //var entry = assembly.EntryPoint;
-            //entry.Invoke(null, null);
-
-            //// unload module
-            //assemblyLoader.Unload();
-
-            var assemblyLoadContextWeakRef = LoadAndExecute(result, null);
+            var assemblyLoadContextWeakRef = LoadAndExecute(SourceDetail.BuildCode, null);
 
             for (var i = 0; i < 8 && assemblyLoadContextWeakRef.IsAlive; i++)
             {
@@ -91,7 +40,7 @@ namespace XR.Kernel
                 GC.WaitForPendingFinalizers();
             }
 
-            ConsoleHelpers.PrintLn(assemblyLoadContextWeakRef.IsAlive ? "Unloading failed!" : "Unloading success!");
+            PrintLn(assemblyLoadContextWeakRef.IsAlive ? "Unloading failed!" : "Unloading success!");
 
             return this;
         }
@@ -132,30 +81,24 @@ namespace XR.Kernel
                 if (metadataReferences == null)
                     metadataReferences = new List<MetadataReference>();
 
-                metadataReferences.Add(SourceList.FirstOrDefault(x => x.AssemblyName == nameRef).MetaRef);
+                metadataReferences.Add(MetadataReference.CreateFromFile(nameRef));
             }
 
             return metadataReferences;
         }
 
-
-        private static CSharpCompilation CreateCompilationWithMscorlib(
-            string assemblyOrModuleName,
-            string code,
-            CSharpCompilationOptions compilerOptions = null,
-            IEnumerable<MetadataReference> references = null)
+        private static CSharpCompilation GenerateCode(string assemblyOrModuleName, string code, IEnumerable<MetadataReference> references = null)
         {
-            // create the syntax tree
             SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, null, string.Empty);
 
             IEnumerable<MetadataReference> refs = new MetadataReference[]
             {
-                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),                
                 MetadataReference.CreateFromFile(typeof(System.Runtime.AssemblyTargetedPatchBandAttribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(ConsoleHelpers).Assembly.Location),
-        };
+            };
             if (references != null)
                 refs.Concat(references);
 
@@ -164,75 +107,15 @@ namespace XR.Kernel
             (
                 assemblyOrModuleName,
                 new[] { syntaxTree },
-                options: compilerOptions,
+                options: new CSharpCompilationOptions(OutputKind.ConsoleApplication,
+                   optimizationLevel: OptimizationLevel.Release,
+                   assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default),
                 references: refs
             );
 
             return compilation;
         }
-       
-    }
 
-    internal class AssemblyLoaderContext : AssemblyLoadContext
-    {
-        //private AssemblyDependencyResolver _resolver;
-
-        //public AssemblyLoaderContext(string mainAssemblyToLoadPath) : base(isCollectible: true)
-        //{
-        //    //_resolver = new AssemblyDependencyResolver(mainAssemblyToLoadPath);
-        //}
-        public AssemblyLoaderContext() : base(true)
-        {
-
-        }
-    }
-
-    internal static class CompilerEx
-    {
-        // emit the compilation result into a byte array.
-        // throw an exception with corresponding message
-        // if there are errors
-        internal static byte[] EmitToArray(this Compilation compilation)
-        {
-            using (var stream = new MemoryStream())
-            {
-                // emit result into a stream
-                var emitResult = compilation.Emit(stream);
-
-                if (!emitResult.Success)
-                {
-                    // if not successful, throw an exception
-                    Diagnostic firstError =
-                        emitResult
-                            .Diagnostics
-                            .FirstOrDefault
-                            (
-                                diagnostic =>
-                                    diagnostic.Severity == DiagnosticSeverity.Error
-                            );
-
-                    throw new Exception(firstError?.GetMessage());
-                }
-
-                // get the byte array from a stream
-                return stream.ToArray();
-            }
-        }
-    }
-    internal class SourceDetail
-    {
-        public SourceDetail(string assemblyName, string sourceCode, params string[] moduleRef)
-        {
-            AssemblyName = assemblyName;
-            SourceCode = sourceCode;
-            ModuleRef = moduleRef;
-        }
-
-        public string AssemblyName { get; set; }
-        public string[] ModuleRef { get; set; }
-        public string SourceCode { get; set; }
-        public MetadataReference MetaRef { get; set; }
-        public byte[] EmitResult { get; set; }
     }
 
 }
