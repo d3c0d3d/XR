@@ -13,6 +13,8 @@ namespace XR.App
     internal class Main
     {
         private const string _regexGetKeys = @"[^}]*}";
+        // todo: only web
+        private const string _regexImportFrom = @"ImportFrom\(""([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#]?[\w-]+)*\/?""\);";
 
         internal static void RunFile(string location)
         {
@@ -34,6 +36,8 @@ namespace XR.App
 
         private static string ParseFile(string file)
         {
+            file = ProcessImportFrom(file);
+
             var cacheFile = file;
 
             var extrateds = Regex.Split(file, _regexGetKeys);
@@ -47,6 +51,28 @@ namespace XR.App
             var finalSource = $"{cacheFile}\n{fmtSource}";
 
             return finalSource;
+        }
+        // todo: only web
+        private static string ProcessImportFrom(string file)
+        {   
+            var matchs = Regex.Matches(file, _regexImportFrom);
+            if (matchs == null || matchs.Count == 0)
+                return file;
+
+            foreach (var match in matchs)
+            {
+                var url = match.ToString().Replace($"{Common.ImportFromDefName}(", string.Empty)
+                    .Replace("\"",string.Empty)
+                    .Replace("(",string.Empty)
+                    .Replace(");", string.Empty);
+
+                var code = GetFileRaw(url);
+
+                file = file.Replace(Regex.Match(file,_regexImportFrom).Value, code);
+
+            }
+
+            return file;
         }
 
         private static string GetFileRaw(string location)

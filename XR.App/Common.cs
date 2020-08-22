@@ -25,5 +25,7 @@ namespace XR.App
 ";
             ConsoleHelpers.PrintLnC(_brand, ConsoleColor.Gray);
         }
+
+        internal const string ImportFromDefName = "ImportFrom";
     }
 }
