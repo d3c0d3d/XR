@@ -40,7 +40,7 @@ namespace XR.Kernel
                 GC.WaitForPendingFinalizers();
             }
 
-            PrintLn(assemblyLoadContextWeakRef.IsAlive ? "Unloading failed!" : "Unloading success!");
+            PrintLnC(assemblyLoadContextWeakRef.IsAlive ? "Unloading failed!" : "Unloading success!",ConsoleColor.White);
 
             return this;
         }
@@ -68,7 +68,7 @@ namespace XR.Kernel
         private static Assembly AssemblyLoadContext_Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
         {
             var assembly = context.LoadFromAssemblyName(assemblyName);
-            PrintLn("Resolving: " + assemblyName.FullName);
+            PrintLnC("Resolving: " + assemblyName.FullName,ConsoleColor.White);
             return assembly;
         }
 

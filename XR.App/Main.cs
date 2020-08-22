@@ -22,7 +22,7 @@ namespace XR.App
 
             string source = ParseFile(rawData);
 
-            PrintLn($"{location} Compiling...");
+            PrintLnC($"{location} Compiling...",ConsoleColor.White);
             _ = new Compiler().Build("program", source).Run();
 
             //var file = Path.Combine(AppContext.BaseDirectory, "program.dll");
