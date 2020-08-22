@@ -11,9 +11,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using XR.Kernel.Util;
 using System.Runtime.Loader;
+using static XR.Kernel.Util.ConsoleHelpers;
 
-namespace XR.Core
+namespace XR.Kernel
 {
     public class Compiler
     {
@@ -52,6 +54,75 @@ namespace XR.Core
             return this;
         }
 
+        public Compiler Run()
+        {
+            var programDetail = SourceList.LastOrDefault();
+
+            var mainCompilation =
+                CreateCompilationWithMscorlib
+                (
+                    programDetail.AssemblyName,
+                    programDetail.SourceCode,
+                    // note that here we pass the OutputKind set to ConsoleApplication
+                    new CSharpCompilationOptions(OutputKind.ConsoleApplication),
+                    GetRefs(programDetail.ModuleRef)
+                );
+
+            // Emit the byte result of the compilation
+            byte[] result = mainCompilation.EmitToArray();
+
+            //// Load the resulting assembly into the domain. 
+            ////Assembly assembly = Assembly.Load(result);
+            //var assemblyLoader = new AssemblyLoaderContext();
+
+            //var assembly = assemblyLoader.LoadFromStream(new MemoryStream(result));
+
+            //var entry = assembly.EntryPoint;
+            //entry.Invoke(null, null);
+
+            //// unload module
+            //assemblyLoader.Unload();
+
+            var assemblyLoadContextWeakRef = LoadAndExecute(result, null);
+
+            for (var i = 0; i < 8 && assemblyLoadContextWeakRef.IsAlive; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
+            ConsoleHelpers.PrintLn(assemblyLoadContextWeakRef.IsAlive ? "Unloading failed!" : "Unloading success!");
+
+            return this;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static WeakReference LoadAndExecute(byte[] compiledAssembly, string[] args)
+        {
+            using var asm = new MemoryStream(compiledAssembly);
+            var assemblyLoadContext = new AssemblyLoaderContext();
+            assemblyLoadContext.Resolving += AssemblyLoadContext_Resolving;
+
+            var assembly = assemblyLoadContext.LoadFromStream(asm);
+
+            var entry = assembly.EntryPoint;
+
+            _ = entry != null && entry.GetParameters().Length > 0
+                ? entry.Invoke(null, new object[] { args })
+                : entry.Invoke(null, null);
+
+            assemblyLoadContext.Unload();
+
+            return new WeakReference(assemblyLoadContext);
+        }
+
+        private static Assembly AssemblyLoadContext_Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
+        {
+            var assembly = context.LoadFromAssemblyName(assemblyName);
+            PrintLn("Resolving: " + assemblyName.FullName);
+            return assembly;
+        }
+
         private IEnumerable<MetadataReference> GetRefs(params string[] moduleNameRef)
         {
             List<MetadataReference> metadataReferences = null;
@@ -73,30 +144,20 @@ namespace XR.Core
             string code,
             CSharpCompilationOptions compilerOptions = null,
             IEnumerable<MetadataReference> references = null)
-        {   
+        {
             // create the syntax tree
             SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, null, string.Empty);
 
-            var dotNetCoreDir = Path.GetDirectoryName(typeof(object).GetTypeInfo().Assembly.Location);
-
-            // get the reference to mscore library
-            MetadataReference mscoreLibRef =
-                AssemblyMetadata.CreateFromFile(typeof(object).Assembly.Location).GetReference();
-
-            MetadataReference consoleRef =
-                AssemblyMetadata.CreateFromFile(typeof(Console).Assembly.Location).GetReference();
-
-            MetadataReference runtimeRef =
-               MetadataReference.CreateFromFile(Path.Combine(dotNetCoreDir, "System.Runtime.dll"));
-
-            // create the allReferences collection consisting of 
-            // mscore reference and all the references passed to the method
-            IEnumerable<MetadataReference> allReferences =
-                new MetadataReference[] { mscoreLibRef, consoleRef, runtimeRef};
-            if (references != null)
+            IEnumerable<MetadataReference> refs = new MetadataReference[]
             {
-                allReferences = allReferences.Concat(references);
-            }
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.Runtime.AssemblyTargetedPatchBandAttribute).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(ConsoleHelpers).Assembly.Location),
+        };
+            if (references != null)
+                refs.Concat(references);
 
             // create and return the compilation
             CSharpCompilation compilation = CSharpCompilation.Create
@@ -104,66 +165,15 @@ namespace XR.Core
                 assemblyOrModuleName,
                 new[] { syntaxTree },
                 options: compilerOptions,
-                references: allReferences
+                references: refs
             );
 
             return compilation;
         }
-
-        public Compiler Run()
-        {
-            var programDetail = SourceList.LastOrDefault();
-
-            var mainCompilation =
-                CreateCompilationWithMscorlib
-                (
-                    programDetail.AssemblyName,
-                    programDetail.SourceCode,
-                    // note that here we pass the OutputKind set to ConsoleApplication
-                    new CSharpCompilationOptions(OutputKind.ConsoleApplication),
-                    GetRefs(programDetail.ModuleRef)
-                );
-
-            // Emit the byte result of the compilation
-            byte[] result = mainCompilation.EmitToArray();
-
-            // Load the resulting assembly into the domain. 
-            //Assembly assembly = Assembly.Load(result);
-            var asm = new AssemblyLoaderContext();
-            asm.Resolving += ResolvingHandler;
-            var assembly = asm.LoadFromStream(new MemoryStream(result));
-
-            var entry = assembly.EntryPoint;
-            entry.Invoke(null, null);
-            // load the A.netmodule and B.netmodule into the assembly.
-
-            //foreach (var src in SourceList)
-            //{
-               // if (src.AssemblyName.ToLower() != "program")
-                  //  asm.LoadFromStream(new MemoryStream(src.EmitResult));
-                    //assembly.LoadModule($"{src.AssemblyName}.netmodule",src.EmitResult);
-           /// }
-            
-            // get the type Program from the assembly
-            //Type programType = asm.GetType("Program");
-
-            // Get the static Main() method info from the type
-            //MethodInfo method = programType.GetMethod("Main");
-
-            // invoke Program.Main() static method
-            //method.Invoke(null, null);
-
-            return this;
-        }
-        private Assembly ResolvingHandler(AssemblyLoadContext context, AssemblyName assemblyName)
-        {
-            var assembly = context.LoadFromAssemblyName(assemblyName);
-            Console.WriteLine("Resolving: " + assemblyName.FullName);
-            return assembly;
-        }
+       
     }
 
-   internal class AssemblyLoaderContext : AssemblyLoadContext
+    internal class AssemblyLoaderContext : AssemblyLoadContext
     {
         //private AssemblyDependencyResolver _resolver;
 
@@ -171,16 +181,9 @@ namespace XR.Core
         //{
         //    //_resolver = new AssemblyDependencyResolver(mainAssemblyToLoadPath);
         //}
-
-        protected override Assembly Load(AssemblyName name)
+        public AssemblyLoaderContext() : base(true)
         {
-            //string assemblyPath = _resolver.ResolveAssemblyToPath(name);
-            //if (assemblyPath != null)
-            //{
-            //    return LoadFromAssemblyPath(assemblyPath);
-            //}
 
-            return null;
         }
     }
 

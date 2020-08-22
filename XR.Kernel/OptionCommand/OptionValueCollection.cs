@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace XR.Core.OptionCommand
+namespace XR.Kernel.OptionCommand
 {
     public class OptionValueCollection : IList, IList<string>
     {

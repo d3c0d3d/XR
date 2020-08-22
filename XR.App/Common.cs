@@ -1,5 +1,5 @@
 ﻿using System;
-using XR.Core.Util;
+using XR.Kernel.Util;
 
 namespace XR.App
 {

@@ -1,4 +1,4 @@
-﻿namespace XR.Core.OptionCommand
+﻿namespace XR.Kernel.OptionCommand
 {
     public class OptionContext
     {

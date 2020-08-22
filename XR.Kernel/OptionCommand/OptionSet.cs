@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace XR.Core.OptionCommand
+namespace XR.Kernel.OptionCommand
 {
     public sealed class OptionSet : KeyedCollection<string, Option>
     {

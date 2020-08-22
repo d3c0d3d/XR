@@ -1,4 +1,4 @@
-﻿using XR.Core.Extensions;
+﻿using XR.Kernel.Extensions;
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 #endif
 
-namespace XR.Core.Util
+namespace XR.Kernel.Util
 {
     public static class ConsoleHelpers
     {
@@ -118,6 +118,8 @@ namespace XR.Core.Util
             return ret;
         }
 
+#if Windows
+
         // P/Invoke declarations
         private struct RECT { public int left, top, right, bottom; }
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -126,5 +128,7 @@ namespace XR.Core.Util
         private static extern bool GetWindowRect(IntPtr hWnd, out RECT rc);
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool MoveWindow(IntPtr hWnd, int x, int y, int w, int h, bool repaint);
+
+#endif
     }
 }

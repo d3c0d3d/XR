@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using XR.Core;
-using XR.Core.OptionCommand;
-using XR.Core.Extensions;
-using static XR.Core.Util.ConsoleHelpers;
+using XR.Kernel;
+using XR.Kernel.OptionCommand;
+using XR.Kernel.Extensions;
+using static XR.Kernel.Util.ConsoleHelpers;
 using System.IO;
-using XR.Core.Util;
+using XR.Kernel.Util;
 using System.Text.RegularExpressions;
 using System.Linq;
 
