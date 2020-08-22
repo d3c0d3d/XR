@@ -13,8 +13,8 @@ namespace XR.App
     internal class Main
     {
         private const string _regexGetKeys = @"[^}]*}";
-        // todo: only web
-        private const string _regexImportFrom = @"ImportFrom\(""([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#]?[\w-]+)*\/?""\);";
+        
+        private const string _regexImportFrom = @"ImportFrom\(""(([a-zA-Z]:\\[\\\S|*\S]?.*)|([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#]?[\w-]+)*\/?)""\);";
 
         internal static void RunFile(string location)
         {
@@ -52,7 +52,7 @@ namespace XR.App
 
             return finalSource;
         }
-        // todo: only web
+        
         private static string ProcessImportFrom(string file)
         {   
             var matchs = Regex.Matches(file, _regexImportFrom);
@@ -80,7 +80,7 @@ namespace XR.App
             string sourceContent;
             if (location.ContainsAny("http://", "https://"))
             {
-                PrintLn($"{location} Downloading...");
+                PrintLnC($"{location} Downloading...",ConsoleColor.White);
                 sourceContent = Utilities.GetTextFileAsync(location).Result;
             }
             else
