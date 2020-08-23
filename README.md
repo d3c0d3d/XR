@@ -2,6 +2,16 @@
 
 Runtime Experimental that downloads/compile and executes C# codes modified named (.xr) in a decentralized way from a single file or url
 
+### Clone
+```
+git clone https://github.com/d3c0d3d/XR.git
+```
+
+### Build
+```
+dotnet run
+```
+
 ## Usage
 
 ### Example
