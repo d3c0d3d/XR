@@ -48,7 +48,9 @@ namespace XR.App
 
             var fmtSource = Templates.MainProgramStr.Replace("{code}", extrated.Replace("\r\n", "\r\n         "));
 
-            var finalSource = $"{cacheFile}\n{fmtSource}";
+            var mountSource = $"{cacheFile}\n{fmtSource}";
+
+            var finalSource = $"{Templates.DefaultUsings}\n\n{mountSource}";
 
             return finalSource;
         }
