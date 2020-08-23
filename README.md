@@ -12,3 +12,4 @@ or
 ```
 run=file.xr
 ```
+![alt text](https://github.com/d3c0d3d/XR/raw/master/images/screenshot.png?raw=true)
