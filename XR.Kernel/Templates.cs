@@ -2,10 +2,11 @@
 {
     public static class Templates
     {
-        public const string DefaultUsings =
-@"using System;
-using XR.Kernel.Util;
-using static XR.Kernel.Util.ConsoleHelpers;";
+        public static string[] DefaultUsings = new string[] { 
+            "using System;",
+            "using XR.Kernel.Util;",
+            "using static XR.Kernel.Util.ConsoleHelpers;"
+        };
 
         public const string MainProgramStr =
 @"public class Program
@@ -14,6 +15,8 @@ using static XR.Kernel.Util.ConsoleHelpers;";
     {
          {code}
     }
+
+    {methods}
 }";
     }
 }

@@ -1,0 +1,3 @@
+ImportFrom("D:\Sources\XR\Samples\createfile.xr");
+
+PrintLn("Test Success");
