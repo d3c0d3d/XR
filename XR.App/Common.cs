@@ -5,8 +5,8 @@ namespace XR.App
 {
     internal class Common
     {
-        internal const string KIND_APPNAME = "XR - Coded by 0xd3c0d3d";
-        internal const string KIND_VERSION = "v0.01-Alpha";
+        internal const string KIND_APPNAME = "XR - Powered by 0xd3c0d3d";
+        internal const string KIND_VERSION = "v0.02-Alpha";
 
         internal static void PrintBrand()
         {
@@ -21,11 +21,16 @@ namespace XR.App
 ..:::::..::..:::::..::
 {KIND_VERSION}
 
-© {DateTime.Now.Year} - Coded by 0xd3c0d3d
+© {DateTime.Now.Year} - Powered by 0xd3c0d3d
 ";
             ConsoleHelpers.PrintLnC(_brand, ConsoleColor.Gray);
         }
 
+        // Regexs
         internal const string ImportFromDefName = "ImportFrom";
+        internal const string RegexMethodCodeBlock = @"(\[attribute\]|public|private|protected|static)(?<signature>[^{]*)(?<body>(?:\{[^}]*\}|//.*\r?\n|""[^""]*""|[\S\s])*?\{(?:\{[^}]*\}|//.*\r?\n|""[^""]*""|[\S\s])*?)\}";
+        internal const string RegexImportFrom = @"ImportFrom\(""(([a-zA-Z]:\\[\\\S|*\S]?.*)|([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#]?[\w-]+)*\/?)""\);";
+        internal const string RegexUsings = @"using\s?.*\w+;";
+
     }
 }

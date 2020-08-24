@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using XR.Kernel.Util;
 using System.Runtime.Loader;
 using static XR.Kernel.Util.ConsoleHelpers;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace XR.Kernel
 {
@@ -87,20 +88,50 @@ namespace XR.Kernel
             return metadataReferences;
         }
 
+        public static List<string> GetClassesContent(string code)
+        {
+            SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, null, string.Empty);
+
+            var visitor = new VirtualizationVisitor();
+            visitor.Visit(syntaxTree.GetRoot());
+
+            return visitor.ClassesText;
+        }
+
+        public static List<string> GetMethodsContent(string code)
+        {
+            SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, null, string.Empty);
+
+            var visitor = new VirtualizationVisitor();
+            visitor.Visit(syntaxTree.GetRoot());
+
+            return visitor.MethodsText;
+        }
+
         private static CSharpCompilation GenerateCode(string assemblyOrModuleName, string code, IEnumerable<MetadataReference> references = null)
         {
             SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, null, string.Empty);
 
-            IEnumerable<MetadataReference> refs = new MetadataReference[]
+            //IEnumerable<MetadataReference> refs = new MetadataReference[]
+            //{
+            //    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),                
+            //    MetadataReference.CreateFromFile(typeof(System.Runtime.AssemblyTargetedPatchBandAttribute).Assembly.Location),
+            //    MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location),
+            //    MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
+            //    MetadataReference.CreateFromFile(typeof(ConsoleHelpers).Assembly.Location),
+            //};
+
+            var domainAssemblys = AppDomain.CurrentDomain.GetAssemblies();
+            var metadataReferenceList = new List<MetadataReference>();
+            foreach (var assembl in domainAssemblys)
             {
-                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),                
-                MetadataReference.CreateFromFile(typeof(System.Runtime.AssemblyTargetedPatchBandAttribute).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(ConsoleHelpers).Assembly.Location),
-            };
-            if (references != null)
-                refs.Concat(references);
+                var assemblyMetadata = AssemblyMetadata.CreateFromFile(assembl.Location);
+                var metadataReference = assemblyMetadata.GetReference();
+                metadataReferenceList.Add(metadataReference);
+            }
+
+            //if (references != null)
+            //    refs.Concat(references);
 
             // create and return the compilation
             CSharpCompilation compilation = CSharpCompilation.Create
@@ -110,12 +141,38 @@ namespace XR.Kernel
                 options: new CSharpCompilationOptions(OutputKind.ConsoleApplication,
                    optimizationLevel: OptimizationLevel.Release,
                    assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default),
-                references: refs
+                references: metadataReferenceList
             );
 
             return compilation;
         }
 
+    }
+
+    internal class VirtualizationVisitor : CSharpSyntaxRewriter
+    {
+        public List<string> ClassesText = new List<string>();
+        public List<string> MethodsText = new List<string>();
+
+        public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
+        {
+            node = (MethodDeclarationSyntax)base.VisitMethodDeclaration(node);
+
+            string methodBody = node.GetText().ToString();
+            MethodsText.Add(methodBody);
+
+            return node;
+        }
+
+        public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
+        {
+            node = (ClassDeclarationSyntax)base.VisitClassDeclaration(node);
+
+            string classBody = node.GetText().ToString();
+            ClassesText.Add(classBody);
+
+            return node;
+        }
     }
 
 }

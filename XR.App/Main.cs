@@ -6,16 +6,13 @@ using static XR.Kernel.Util.ConsoleHelpers;
 using System.IO;
 using XR.Kernel.Util;
 using System.Text.RegularExpressions;
-using System.Linq;
+using System.Collections.Generic;
+using System.Text;
 
 namespace XR.App
 {
     internal class Main
     {
-        private const string _regexGetKeys = @"[^}]*}";
-        
-        private const string _regexImportFrom = @"ImportFrom\(""(([a-zA-Z]:\\[\\\S|*\S]?.*)|([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#]?[\w-]+)*\/?)""\);";
-
         internal static void RunFile(string location)
         {
             string rawData = GetFileRaw(location);
@@ -36,28 +33,54 @@ namespace XR.App
 
         private static string ParseFile(string file)
         {
-            file = ProcessImportFrom(file);
+            // get from web or localpath
+            var fullcode = ProcessImportFrom(file);
 
-            var cacheFile = file;
+            var cleanupFile = fullcode;
 
-            var extrateds = Regex.Split(file, _regexGetKeys);
-            var extrated = extrateds.Where(x => !x.IsNull()).ToArray().FirstOrDefault();
-            // remove extrated part
-            cacheFile = cacheFile.Replace(extrated, string.Empty);
-            extrated = extrated.TrimStart();
+            var codeBuilder = new StringBuilder();
 
-            var fmtSource = Templates.MainProgramStr.Replace("{code}", extrated.Replace("\r\n", "\r\n         "));
+            var usingsList = GetUsingsFromFile(cleanupFile);
+            
+            foreach (var usinExt in usingsList)
+            {
+                cleanupFile = cleanupFile.Replace(usinExt, null).TrimEx();
 
-            var mountSource = $"{cacheFile}\n{fmtSource}";
+                codeBuilder.AppendLine(usinExt);
+            }
 
-            var finalSource = $"{Templates.DefaultUsings}\n\n{mountSource}";
+            var getClasses = Compiler.GetClassesContent(cleanupFile);
+            foreach (var classeContent in getClasses)
+            {
+                cleanupFile = cleanupFile.Replace(classeContent, null);
 
-            return finalSource;
+                codeBuilder.AppendLine(classeContent);
+            }
+
+            var methodsExtracts = Regex.Matches(cleanupFile, Common.RegexMethodCodeBlock);
+            string methodsList = null;
+
+            foreach (var method in methodsExtracts)
+            {
+                // remove method from principal code
+                cleanupFile = cleanupFile.Replace(method.ToString(), null);
+
+                methodsList += $"\n{method}";
+            }
+
+            cleanupFile = cleanupFile.Replace("\r\n\r\n\r", string.Empty);
+
+            var formatCode = Templates.MainProgramStr.Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
+            formatCode = formatCode.Replace("{methods}", methodsList);
+
+            codeBuilder.AppendLine(formatCode);
+
+            return codeBuilder.ToString();
         }
         
         private static string ProcessImportFrom(string file)
         {   
-            var matchs = Regex.Matches(file, _regexImportFrom);
+            var matchs = Regex.Matches(file, Common.RegexImportFrom);
             if (matchs == null || matchs.Count == 0)
                 return file;
 
@@ -70,11 +93,32 @@ namespace XR.App
 
                 var code = GetFileRaw(url);
 
-                file = file.Replace(Regex.Match(file,_regexImportFrom).Value, code);
-
+                file = file.Replace(Regex.Match(file,Common.RegexImportFrom).Value, code);
             }
 
             return file;
+        }
+
+        private static List<string> GetUsingsFromFile(string file)
+        {
+            List<string> UsingList = new List<string>();
+
+            var matchs = Regex.Matches(file, Common.RegexUsings);            
+
+            foreach (var match in matchs)
+            {
+                UsingList.Add(match.ToString());
+            }
+            // add default usings from template
+            foreach (var defUsing in Templates.DefaultUsings)
+            {
+                if(!UsingList.Contains(defUsing))
+                {
+                    UsingList.Add(defUsing);
+                }
+            }
+
+            return UsingList;
         }
 
         private static string GetFileRaw(string location)
