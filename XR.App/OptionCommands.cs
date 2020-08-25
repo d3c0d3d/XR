@@ -1,6 +1,6 @@
 ﻿using System;
 using XR.Kernel.OptionCommand;
-using XR.Kernel.Util;
+using XR.Kernel.Std;
 
 namespace XR.App
 {
@@ -11,7 +11,7 @@ namespace XR.App
 
         internal static void Startup()
         {
-            _titleCache = ConsoleHelpers.GetTitle();
+            _titleCache = Cli.GetTitle();
         }
 
         internal static void Execute(string[] args)
@@ -28,7 +28,7 @@ namespace XR.App
 
         internal static void Idle()
         {
-            ConsoleHelpers.ShellCaret(ConsoleColor.White);
+            Cli.ShellCaret(ConsoleColor.White);
         }
 
         private static void CreateCommands()

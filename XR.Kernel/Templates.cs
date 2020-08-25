@@ -1,22 +1,29 @@
-﻿namespace XR.Kernel
+﻿using System;
+
+namespace XR.Kernel
 {
     public static class Templates
     {
         public static string[] DefaultUsings = new string[] { 
             "using System;",
-            "using XR.Kernel.Util;",
-            "using static XR.Kernel.Util.ConsoleHelpers;"
+            "using System.IO;",
+            "using System.Text;",
+            "using System.Threading.Tasks;",
+            $"using XR.Kernel.{nameof(Std)};",
+            $"using static XR.Kernel.{nameof(Std)}.{nameof(Std.Cli)};",
+            $"using static XR.Kernel.{nameof(Std)}.{nameof(Std.Net)};",
         };
-
-        public const string MainProgramStr =
-@"public class Program
-{
-    public static void Main()
-    {
-         {code}
-    }
-
-    {methods}
-}";
+   
+        public static string GetMainProgram(bool async)
+        {
+            return $"public class Program{Environment.NewLine}" +
+                $"{{" +
+                $"    public static {(async ? "async Task" : "void")} Main(string[] args){Environment.NewLine}" +
+                $"    {{" +
+                $"         {{code}}{Environment.NewLine}" +
+                $"    }}{Environment.NewLine}" +
+                $"    {{methods}}{Environment.NewLine}" +
+                $"}}";
+        }
     }
 }

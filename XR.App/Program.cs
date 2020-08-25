@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using XR.Kernel.OptionCommand;
-using static XR.Kernel.Util.ConsoleHelpers;
+using static XR.Kernel.Std.Cli;
 
 namespace XR.App
 {
@@ -15,7 +15,7 @@ namespace XR.App
             {
                 try
                 {
-                    OptionCommands.Execute(ShellArgs());
+                    OptionCommands.Execute(args);
                 }
                 catch (OptionException e)
                 {
