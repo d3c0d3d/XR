@@ -1,12 +1,12 @@
 ﻿using System;
-using XR.Kernel.Util;
+using XR.Kernel.Std;
 
 namespace XR.App
 {
     internal class Common
     {
         internal const string KIND_APPNAME = "XR - Powered by 0xd3c0d3d";
-        internal const string KIND_VERSION = "v0.02-Alpha";
+        internal const string KIND_VERSION = "v0.03-Alpha";
 
         internal static void PrintBrand()
         {
@@ -23,7 +23,7 @@ namespace XR.App
 
 © {DateTime.Now.Year} - Powered by 0xd3c0d3d
 ";
-            ConsoleHelpers.PrintLnC(_brand, ConsoleColor.Gray);
+            Cli.PrintLnC(_brand, ConsoleColor.Gray);
         }
 
         // Regexs

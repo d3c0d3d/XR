@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using XR.Kernel.Util;
 using System.Runtime.Loader;
-using static XR.Kernel.Util.ConsoleHelpers;
+using static XR.Kernel.Std.Cli;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using XR.Kernel.Extensions;
+using System.Diagnostics;
 
 namespace XR.Kernel
 {
@@ -41,7 +41,7 @@ namespace XR.Kernel
                 GC.WaitForPendingFinalizers();
             }
 
-            PrintLnC(assemblyLoadContextWeakRef.IsAlive ? "Unloading failed!" : "Unloading success!",ConsoleColor.White);
+            Debug.WriteLine(assemblyLoadContextWeakRef.IsAlive ? "Unloading failed!" : "Unloading success!",ConsoleColor.White);
 
             return this;
         }
@@ -125,6 +125,8 @@ namespace XR.Kernel
             var metadataReferenceList = new List<MetadataReference>();
             foreach (var assembl in domainAssemblys)
             {
+                if (assembl.Location.IsNull())
+                    continue;
                 var assemblyMetadata = AssemblyMetadata.CreateFromFile(assembl.Location);
                 var metadataReference = assemblyMetadata.GetReference();
                 metadataReferenceList.Add(metadataReference);

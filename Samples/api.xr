@@ -1,0 +1,4 @@
+ImportFrom("D:\Sources\XR\Samples\heatmap.xr");
+var json = await GetJson("https://www.corona.ma.gov.br/public/api/heatmap.json");		
+var covid = JSON<heatmap[]>.Deserialize(json);		
+PrintLnC(covid[1].ToString(),ConsoleColor.Yellow);

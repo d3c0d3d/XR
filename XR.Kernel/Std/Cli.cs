@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 #endif
 
-namespace XR.Kernel.Util
+namespace XR.Kernel.Std
 {
-    public static class ConsoleHelpers
+    public static class Cli
     {
         public static readonly Action<string> Print = (value) => Console.Write(value);
         public static readonly Action<string, ConsoleColor> PrintC = (value, consoleColor) =>

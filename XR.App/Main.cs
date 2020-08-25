@@ -2,9 +2,9 @@
 using XR.Kernel;
 using XR.Kernel.OptionCommand;
 using XR.Kernel.Extensions;
-using static XR.Kernel.Util.ConsoleHelpers;
+using static XR.Kernel.Std.Cli;
 using System.IO;
-using XR.Kernel.Util;
+using XR.Kernel.Std;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Text;
@@ -70,7 +70,7 @@ namespace XR.App
 
             cleanupFile = cleanupFile.Replace("\r\n\r\n\r", string.Empty);
 
-            var formatCode = Templates.MainProgramStr.Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
+            var formatCode = Templates.GetMainProgram(cleanupFile.Contains("await")).Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
             formatCode = formatCode.Replace("{methods}", methodsList);
 
             codeBuilder.AppendLine(formatCode);
@@ -128,7 +128,7 @@ namespace XR.App
             if (location.ContainsAny("http://", "https://"))
             {
                 PrintLnC($"{location} Downloading...",ConsoleColor.White);
-                sourceContent = Utilities.GetTextFileAsync(location).Result;
+                sourceContent = Net.GetTextFileAsync(location).Result;
             }
             else
             {
