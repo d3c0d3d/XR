@@ -1,0 +1,20 @@
+bool quit = false;
+
+while (!quit)
+{
+    try
+    {
+        ShellCaret();    
+        var c = ShellArgs();
+        if(c?.Count() > 0 && c[0] == "-q")
+            quit = true;
+        else
+            foreach(var r in c)
+                PrintLn($"Received -> {r}");
+
+    }        
+    catch (Exception e)
+    {
+        PrintError(e);
+    }
+}

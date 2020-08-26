@@ -8,6 +8,8 @@ namespace XR.Kernel
             "using System;",
             "using System.IO;",
             "using System.Text;",
+            "using System.Linq;",
+            "using System.Reflection;",
             "using System.Threading.Tasks;",
             $"using XR.Kernel.{nameof(Std)};",
             $"using static XR.Kernel.{nameof(Std)}.{nameof(Std.Cli)};",
