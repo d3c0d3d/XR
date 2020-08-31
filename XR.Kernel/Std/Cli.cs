@@ -77,9 +77,8 @@ namespace XR.Kernel.Std
         public static void CenterConsole()
         {
 #if Windows
-            IntPtr hWin = GetConsoleWindow();
-            RECT rc;
-            GetWindowRect(hWin, out rc);
+            IntPtr hWin = GetConsoleWindow();            
+            GetWindowRect(hWin, out RECT rc);
             Screen scr = Screen.FromPoint(new Point(rc.left, rc.top));
             int x = scr.WorkingArea.Left + (scr.WorkingArea.Width - (rc.right - rc.left)) / 2;
             int y = scr.WorkingArea.Top + (scr.WorkingArea.Height - (rc.bottom - rc.top)) / 2;

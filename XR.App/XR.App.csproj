@@ -6,7 +6,9 @@
     <AssemblyName>xr</AssemblyName>
     <Authors>Powered by 0xd3c0d3d</Authors>
     <Company>0xd3c0d3d Inc</Company>
-    <Version>0.0.2</Version>
+    <Version>0.0.4</Version>
+    <Product>XR</Product>
+    <PackageId>XR</PackageId>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp3.1|AnyCPU'">

@@ -1,3 +1,8 @@
+if(args?.Count() > 0){
+    foreach(var arg in args)
+        PrintLn($"{arg} ");
+}
+
 bool quit = false;
 
 while (!quit)
@@ -18,3 +23,4 @@ while (!quit)
         PrintError(e);
     }
 }
+PrintLn("Exiting...");

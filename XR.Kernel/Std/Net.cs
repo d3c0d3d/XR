@@ -36,12 +36,10 @@ namespace XR.Kernel.Std
             public static string Serialize(TType instance)
             {
                 var serializer = new DataContractJsonSerializer(typeof(TType));
-                using (var stream = new MemoryStream())
-                {
-                    serializer.WriteObject(stream, instance);
-                    // todo: break with !@#$%¨&*() in default encoding
-                    return Encoding.UTF8.GetString(stream.ToArray());
-                }
+                using var stream = new MemoryStream();
+                serializer.WriteObject(stream, instance);
+                // todo: break with !@#$%¨&*() in default encoding
+                return Encoding.UTF8.GetString(stream.ToArray());
             }
 
             /// <summary>
@@ -50,11 +48,9 @@ namespace XR.Kernel.Std
             public static TType Deserialize(string json)
             {
                 // todo: break with !@#$%¨&*() in default encoding
-                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-                {
-                    var serializer = new DataContractJsonSerializer(typeof(TType));
-                    return serializer.ReadObject(stream) as TType;
-                }
+                using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+                var serializer = new DataContractJsonSerializer(typeof(TType));
+                return serializer.ReadObject(stream) as TType;
             }
         }
     }
