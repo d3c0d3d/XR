@@ -3,13 +3,13 @@ using Microsoft.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
-namespace XR.Kernel
+namespace XR.Kernel.Core
 {
     internal static class CompilerEx
-    {   
+    {
         internal static byte[] EmitToArray(this Compilation compilation)
         {
-            using var stream = new MemoryStream();            
+            using var stream = new MemoryStream();
             var emitResult = compilation.Emit(stream);
 
             if (!emitResult.Success)

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using XR.Kernel.Extensions;
 using XR.Kernel.OptionCommand;
 using XR.Kernel.Std;
 
@@ -8,6 +10,9 @@ namespace XR.App
     {
         private static OptionSet _optionSet;
         internal static string _titleCache;
+        private static string _fileRun;
+        private static string[] _assembliesLocation;
+        private static string[] _assemblyArgs;
 
         internal static void Startup()
         {
@@ -24,6 +29,14 @@ namespace XR.App
             {
                 Main.ShowHelp(_optionSet);
             }
+            else
+            {
+                if (!_fileRun.IsNull())
+                {
+                    Main.RunFile(_fileRun, _assemblyArgs, _assembliesLocation);
+                    _fileRun = null;
+                }
+            }
         }
 
         internal static void Idle()
@@ -34,7 +47,13 @@ namespace XR.App
         private static void CreateCommands()
         {
             _optionSet = new OptionSet()
-                .Add("run=", "Download/Compile and Run File", Main.RunFile)
+                .Add("run=", "Download/Compile and Run {File/Url}", (p) => _fileRun = p)
+                .Add("args=", "Set Main {Arg} to Assembly", (p) => {
+                    _assemblyArgs = p.Split(new[] { '|' });
+                })
+                .Add("dep=", "Set Assembly Dependencie {Location}", (p) => {
+                    _assembliesLocation = p.Split(new[] { '|' });
+                })                
                 .Add("cls", "Clear Screen", _ =>
                 {
                     Console.Clear();

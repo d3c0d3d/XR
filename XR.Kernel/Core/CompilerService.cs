@@ -6,34 +6,55 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
-using static XR.Kernel.Std.Cli;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using XR.Kernel.Extensions;
+using XR.Kernel.Logging;
+using XR.Kernel.Std;
 using System.Diagnostics;
 
-namespace XR.Kernel
+namespace XR.Kernel.Core
 {
-    public class Compiler
+    public class CompilerService
     {
+        public static readonly Logger _logger = LoggerFactory.CreateLogger(LogLevel.Info, Util.GetEnvLoggerFile(Statics.XR_LOGGER_ENV));
+
         public SourceDetail SourceDetail { get; private set; }
 
-        public Compiler Build(string assemblyName, string sourceCode, params string[] moduleRef)
+        public CompilerService Build(string assemblyName, string location, params string[] moduleRef)
         {
-            SourceDetail = new SourceDetail(assemblyName, sourceCode, moduleRef);
+            var buildWatch = new Stopwatch();
+            buildWatch.Start();
 
-            var compResult = GenerateCode(SourceDetail.AssemblyName, SourceDetail.SourceCode, GetRefs(SourceDetail.ModuleRef));
+            _logger.Info("Build Start");
+
+            string rawData = SourceParse.GetFileRaw(location);
+
+            string source = SourceParse.ParseFile(rawData);
+
+            SourceDetail = new SourceDetail(assemblyName, source, moduleRef);
+
+            var compResult = GenerateCode(SourceDetail.AssemblyName, SourceDetail.SourceCode, SourceDetail.ModuleRef);
 
             byte[] emitResult = compResult.EmitToArray();
 
             // update
             SourceDetail.BuildCode = emitResult;
 
+            buildWatch.Stop();
+            TimeSpan ts = buildWatch.Elapsed;
+
+            string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+
+            _logger.Info($"Build End - {elapsedTime}");
+
             return this;
         }
 
-        public Compiler Run()
+        public CompilerService Run(params string[] args)
         {
-            var assemblyLoadContextWeakRef = LoadAndExecute(SourceDetail.BuildCode, null);
+            var assemblyLoadContextWeakRef = LoadAndExecute(SourceDetail.BuildCode, args);
 
             for (var i = 0; i < 8 && assemblyLoadContextWeakRef.IsAlive; i++)
             {
@@ -41,7 +62,7 @@ namespace XR.Kernel
                 GC.WaitForPendingFinalizers();
             }
 
-            Debug.WriteLine(assemblyLoadContextWeakRef.IsAlive ? "Unloading failed!" : "Unloading success!",ConsoleColor.White);
+            _logger.Info(assemblyLoadContextWeakRef.IsAlive ? "Unloading failed!" : "Unloading success!");
 
             return this;
         }
@@ -68,24 +89,9 @@ namespace XR.Kernel
 
         private static Assembly AssemblyLoadContext_Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
         {
+            _logger.Info($"Resolving: {assemblyName.FullName}");
             var assembly = context.LoadFromAssemblyName(assemblyName);
-            PrintLnC("Resolving: " + assemblyName.FullName,ConsoleColor.White);
             return assembly;
-        }
-
-        private IEnumerable<MetadataReference> GetRefs(params string[] moduleNameRef)
-        {
-            List<MetadataReference> metadataReferences = null;
-
-            foreach (var nameRef in moduleNameRef)
-            {
-                if (metadataReferences == null)
-                    metadataReferences = new List<MetadataReference>();
-
-                metadataReferences.Add(MetadataReference.CreateFromFile(nameRef));
-            }
-
-            return metadataReferences;
         }
 
         public static List<string> GetClassesContent(string code)
@@ -108,18 +114,24 @@ namespace XR.Kernel
             return visitor.MethodsText;
         }
 
-        private static CSharpCompilation GenerateCode(string assemblyOrModuleName, string code, IEnumerable<MetadataReference> references = null)
+        private static CSharpCompilation GenerateCode(string assemblyOrModuleName, string code, string[] assemblyRefs = null)
         {
             SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, null, string.Empty);
 
-            //IEnumerable<MetadataReference> refs = new MetadataReference[]
-            //{
-            //    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),                
-            //    MetadataReference.CreateFromFile(typeof(System.Runtime.AssemblyTargetedPatchBandAttribute).Assembly.Location),
-            //    MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location),
-            //    MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
-            //    MetadataReference.CreateFromFile(typeof(ConsoleHelpers).Assembly.Location),
-            //};
+            if (assemblyRefs != null)
+            {
+                foreach (var assemblyName in assemblyRefs)
+                {
+                    var dllname = assemblyName;
+                    if (dllname.Contains("%ProgramFiles(x86)%"))
+                        dllname = assemblyName.Replace("%ProgramFiles(x86)%", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
+                    if (dllname.Contains("%ProgramFiles%"))
+                        dllname = assemblyName.Replace("%ProgramFiles%", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
+
+                    _logger.Info($"Loading: {dllname}");
+                    Assembly.LoadFrom(dllname).GetReferencedAssemblies();
+                }
+            }
 
             var domainAssemblys = AppDomain.CurrentDomain.GetAssemblies();
             var metadataReferenceList = new List<MetadataReference>();
@@ -128,12 +140,16 @@ namespace XR.Kernel
                 if (assembl.Location.IsNull())
                     continue;
                 var assemblyMetadata = AssemblyMetadata.CreateFromFile(assembl.Location);
+                _logger.Info($"{nameof(assemblyMetadata)}: {assembl.Location}");
                 var metadataReference = assemblyMetadata.GetReference();
                 metadataReferenceList.Add(metadataReference);
             }
 
-            //if (references != null)
-            //    refs.Concat(references);
+            // Add extra refs
+            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.Linq.Expressions.Expression).Assembly.Location));
+            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.ComponentModel.Component).Assembly.Location));
+            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(FileSystemWatcher).Assembly.Location));
+            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.Reactive.Observer).Assembly.Location));
 
             // create and return the compilation
             CSharpCompilation compilation = CSharpCompilation.Create

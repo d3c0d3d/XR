@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace XR.Kernel
+﻿namespace XR.Kernel.Core
 {
     public class SourceDetail
     {
