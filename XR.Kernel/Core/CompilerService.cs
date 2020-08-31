@@ -31,6 +31,8 @@ namespace XR.Kernel.Core
 
             string source = SourceParse.ParseFile(rawData);
 
+            _logger.Info($"---- Source Code Generate ----:\n{source}");
+
             SourceDetail = new SourceDetail(assemblyName, source, moduleRef);
 
             var compResult = GenerateCode(SourceDetail.AssemblyName, SourceDetail.SourceCode, SourceDetail.ModuleRef);
@@ -150,6 +152,7 @@ namespace XR.Kernel.Core
             metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.ComponentModel.Component).Assembly.Location));
             metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(FileSystemWatcher).Assembly.Location));
             metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.Reactive.Observer).Assembly.Location));
+            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.Drawing.Bitmap).Assembly.Location));
 
             // create and return the compilation
             CSharpCompilation compilation = CSharpCompilation.Create

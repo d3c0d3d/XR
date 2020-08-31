@@ -10,6 +10,7 @@ namespace XR.Kernel.Core
             "using System.Text;",
             "using System.Linq;",
             "using System.Linq.Expressions;",
+            "using System.Collections.Generic;",
             "using System.Reflection;",
             "using System.Threading.Tasks;",
             $"using XR.Kernel.{nameof(Std)};",

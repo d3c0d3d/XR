@@ -1,0 +1,30 @@
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Windows.Forms;
+
+try
+{
+    var name = $"printscreen_{DateTime.Now:dd_MM_yyyy_hh_mm_ss}.png";
+
+    File.WriteAllBytes(name, GetPrintScreenRaw());
+
+    PrintLn($"{name} Saved!");
+}
+catch (Exception ex)
+{
+    PrintError(ex);
+}
+
+internal static byte[] GetPrintScreenRaw()
+{    
+    var screen = Screen.AllScreens.FirstOrDefault();
+
+    var printscreen = new Bitmap(screen.Bounds.Width, screen.Bounds.Height);
+    var graphics = Graphics.FromImage(printscreen as Image);
+    graphics.CopyFromScreen(0, 0, 0, 0, printscreen.Size);
+    var stream = new MemoryStream();
+    printscreen.Save(stream, ImageFormat.Png);
+    var imageBytes = stream.ToArray();
+
+    return imageBytes;
+}
