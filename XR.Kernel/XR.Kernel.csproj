@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -27,10 +27,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
     <PackageReference Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(IsWindows)'=='true'">
     <Reference Include="System.Windows.Forms">
       <HintPath>C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.Windows.Forms.dll</HintPath>
     </Reference>

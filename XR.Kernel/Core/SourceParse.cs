@@ -49,7 +49,7 @@ namespace XR.Kernel.Core
 
             cleanupFile = cleanupFile.Replace("\r\n\r\n\r", string.Empty);
 
-            var formatCode = Templates.GetMainProgram(cleanupFile.Contains("await")).Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
+            var formatCode = Templates.MainBody(async: cleanupFile.Contains("await")).Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
             formatCode = formatCode.Replace("{methods}", methodsList);
 
             codeBuilder.AppendLine(formatCode);
@@ -70,7 +70,7 @@ namespace XR.Kernel.Core
                     .Replace("(", string.Empty)
                     .Replace(");", string.Empty);
 
-                var code = GetFileRaw(url);
+                var code = GetSourceFileRaw(url);
 
                 file = file.Replace(Regex.Match(file, Statics.RegexImportFrom).Value, code);
             }
@@ -78,27 +78,46 @@ namespace XR.Kernel.Core
             return file;
         }
 
-        internal static string GetFileRaw(string location)
+        internal static string GetSourceFileRaw(string location)
         {
-            string sourceContent;
+            string file;
             location = location.TrimEx();
             if (location.ContainsAny("http://", "https://"))
             {
                 Cli.PrintLnC($"{location} Downloading...", ConsoleColor.White);
-                sourceContent = Net.GetTextFileAsync(location).Result;
 
-                if (sourceContent.Contains("<!DOCTYPE html>"))
-                    throw new KernelException("Html file is not supported");
+                file = Net.GetStringAsync(location).Result;
             }
             else
             {
                 if (!location.EndsWith(".xr"))
                     throw new KernelException("extension (.xr) mandatory");
 
-                sourceContent = File.ReadAllText(location);
+                file = File.ReadAllText(location);
             }
 
-            return sourceContent;
+            var (valid, message) = IsValidSource(file);
+
+            if (!valid)
+                throw new KernelException(message);
+
+            return file;
+        }
+
+        private static (bool valid, string message) IsValidSource(string source)
+        {
+            var sourceLower = source.ToLower();
+
+            if (sourceLower.Contains("<!DOCTYPE html>"))
+                return (false, "Html file is not supported");
+
+            if (sourceLower.Contains("void main"))
+                return (false,"method main is not necessary");
+
+            if (sourceLower.Contains("class program"))
+                return (false, "class program is not necessary");
+
+            return (true, string.Empty);
         }
 
         private static List<string> GetUsingsFromFile(string file)

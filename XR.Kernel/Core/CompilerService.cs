@@ -27,15 +27,19 @@ namespace XR.Kernel.Core
 
             _logger.Info("Build Start");
 
-            string rawData = SourceParse.GetFileRaw(location);
+            string rawData = SourceParse.GetSourceFileRaw(location);
 
             string source = SourceParse.ParseFile(rawData);
+
+            _logger.Info($"---- Source Code Generate ----:\n{source}");
 
             SourceDetail = new SourceDetail(assemblyName, source, moduleRef);
 
             var compResult = GenerateCode(SourceDetail.AssemblyName, SourceDetail.SourceCode, SourceDetail.ModuleRef);
 
             byte[] emitResult = compResult.EmitToArray();
+
+            Cli.PrintLnC($"{location} Success", ConsoleColor.White);
 
             // update
             SourceDetail.BuildCode = emitResult;
@@ -54,6 +58,8 @@ namespace XR.Kernel.Core
 
         public CompilerService Run(params string[] args)
         {
+            Cli.PrintLnC($"Start Running...", ConsoleColor.White);
+
             var assemblyLoadContextWeakRef = LoadAndExecute(SourceDetail.BuildCode, args);
 
             for (var i = 0; i < 8 && assemblyLoadContextWeakRef.IsAlive; i++)
@@ -150,6 +156,8 @@ namespace XR.Kernel.Core
             metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.ComponentModel.Component).Assembly.Location));
             metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(FileSystemWatcher).Assembly.Location));
             metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.Reactive.Observer).Assembly.Location));
+            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.Drawing.Bitmap).Assembly.Location));
+            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(Process).Assembly.Location));
 
             // create and return the compilation
             CSharpCompilation compilation = CSharpCompilation.Create

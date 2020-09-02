@@ -8,12 +8,12 @@ namespace XR.Kernel.Std
 {
     public static class Net
     {
-        public static async Task<string> GetJson(string url)
+        public static async Task<string> GetJsonAsync(string url)
         {
             return await GetRaw(url);
         }
 
-        public static async Task<string> GetTextFileAsync(string url)
+        public static async Task<string> GetStringAsync(string url)
         {   
             return await GetRaw(url);
         }

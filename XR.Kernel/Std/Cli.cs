@@ -94,7 +94,7 @@ namespace XR.Kernel.Std
 
         public static string GetTitle()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (OSRuntime.IsLinux())
                 return string.Empty;
 
             return Console.Title;

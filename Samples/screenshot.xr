@@ -1,0 +1,36 @@
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Windows.Forms;
+
+try
+{
+    var name = $"printscreen_{DateTime.Now:dd_MM_yyyy_hh_mm_ss}.png";
+
+    File.WriteAllBytes(name, GetPrintScreenRaw());
+
+    PrintLn($"{name} Saved!");
+    if (OSRuntime.IsWindows())
+    {
+        var result = Input("Open? (y/n)",ConsoleColor.White);
+        if(result.ToLower() == "y")
+            Process.Start("cmd.exe",$"/c {name}");    
+	}    
+}
+catch (Exception ex)
+{
+    PrintError(ex);
+}
+
+static byte[] GetPrintScreenRaw()
+{    
+    var screen = Screen.AllScreens.FirstOrDefault();
+
+    var printscreen = new Bitmap(screen.Bounds.Width, screen.Bounds.Height);
+    var graphics = Graphics.FromImage(printscreen as Image);
+    graphics.CopyFromScreen(0, 0, 0, 0, printscreen.Size);
+    var stream = new MemoryStream();
+    printscreen.Save(stream, ImageFormat.Png);
+    var imageBytes = stream.ToArray();
+
+    return imageBytes;
+}
