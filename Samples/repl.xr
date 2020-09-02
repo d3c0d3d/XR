@@ -2,9 +2,9 @@ if(args?.Count() > 0){
     foreach(var arg in args)
         PrintLn($"{arg} ");
 }
+PrintLnC("-q to quit",ConsoleColor.Yellow);
 
 bool quit = false;
-
 while (!quit)
 {
     try
@@ -16,7 +16,6 @@ while (!quit)
         else
             foreach(var r in c)
                 PrintLn($"Received -> {r}");
-
     }        
     catch (Exception e)
     {

@@ -9,13 +9,19 @@ try
     File.WriteAllBytes(name, GetPrintScreenRaw());
 
     PrintLn($"{name} Saved!");
+    if (OSRuntime.IsWindows())
+    {
+        var result = Input("Open? (y/n)",ConsoleColor.White);
+        if(result.ToLower() == "y")
+            Process.Start("cmd.exe",$"/c {name}");    
+	}    
 }
 catch (Exception ex)
 {
     PrintError(ex);
 }
 
-internal static byte[] GetPrintScreenRaw()
+static byte[] GetPrintScreenRaw()
 {    
     var screen = Screen.AllScreens.FirstOrDefault();
 

@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{A3A4
 		Samples\app.xr = Samples\app.xr
 		Samples\createfile.xr = Samples\createfile.xr
 		Samples\heatmap.xr = Samples\heatmap.xr
-		Samples\relp.xr = Samples\relp.xr
+		Samples\repl.xr = Samples\repl.xr
 		Samples\screenshot.xr = Samples\screenshot.xr
 		Samples\watch.xr = Samples\watch.xr
 	EndProjectSection
