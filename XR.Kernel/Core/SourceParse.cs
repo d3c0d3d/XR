@@ -4,13 +4,13 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using XR.Kernel.Extensions;
-using XR.Kernel.Std;
+using XR.Std;
 
 namespace XR.Kernel.Core
 {
     internal static class SourceParse
     {
-        internal static string ParseFile(string file)
+        internal static string ParseFile(string file, bool useCSharpCode)
         {
             // get from web or localpath
             var fullcode = ProcessImportFrom(file);
@@ -49,7 +49,11 @@ namespace XR.Kernel.Core
 
             cleanupFile = cleanupFile.Replace("\r\n\r\n\r", string.Empty);
 
-            var formatCode = Templates.MainBody(async: cleanupFile.Contains("await")).Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
+            string formatCode;
+            if (useCSharpCode)
+                formatCode = "{code}\n{methods}".Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
+            else
+                formatCode = Templates.MainBody(async: cleanupFile.Contains("await")).Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
             formatCode = formatCode.Replace("{methods}", methodsList);
 
             codeBuilder.AppendLine(formatCode);
@@ -78,7 +82,7 @@ namespace XR.Kernel.Core
             return file;
         }
 
-        internal static string GetSourceFileRaw(string location)
+        internal static string GetSourceFileRaw(string location, bool useCsharpCode = false)
         {
             string file;
             location = location.TrimEx();
@@ -90,7 +94,7 @@ namespace XR.Kernel.Core
             }
             else
             {
-                if (!location.EndsWith(".xr"))
+                if (!useCsharpCode && !location.EndsWith(".xr"))
                     throw new KernelException("extension (.xr) mandatory");
 
                 file = File.ReadAllText(location);

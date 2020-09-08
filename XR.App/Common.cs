@@ -1,12 +1,12 @@
 ﻿using System;
-using XR.Kernel.Std;
+using XR.Std;
 
 namespace XR.App
 {
     internal class Common
     {
         internal const string KIND_APPNAME = "XR - Powered by 0xd3c0d3d";
-        internal const string KIND_VERSION = "v0.04-Alpha";
+        internal const string KIND_VERSION = "v0.05-Alpha";
 
         internal static void PrintBrand()
         {

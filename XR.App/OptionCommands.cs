@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using XR.Kernel.Extensions;
 using XR.Kernel.OptionCommand;
-using XR.Kernel.Std;
+using XR.Std;
 
 namespace XR.App
 {

@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XR.Kernel.Std
+namespace XR.Std
 {
     public static class Net
     {

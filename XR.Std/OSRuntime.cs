@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.RuntimeInformation;
 
-namespace XR.Kernel.Std
+namespace XR.Std
 {
     public static class OSRuntime
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Text;
-using XR.Kernel.Extensions;
+using XR.Extensions;
 
-namespace XR.Kernel.Std
+namespace XR.Std
 {
     public static class Util
     {

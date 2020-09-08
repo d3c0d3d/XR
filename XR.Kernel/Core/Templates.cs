@@ -14,10 +14,10 @@ namespace XR.Kernel.Core
             "using System.Threading.Tasks;",
             "using System.Linq.Expressions;",
             "using System.Collections.Generic;",
-            $"using {nameof(XR)}.{nameof(Kernel)}.{nameof(Std)};",
-            $"using static {nameof(XR)}.{nameof(Kernel)}.{nameof(Std)}.{nameof(Std.Cli)};",
-            $"using static {nameof(XR)}.{nameof(Kernel)}.{nameof(Std)}.{nameof(Std.Net)};",
-            $"using static {nameof(XR)}.{nameof(Kernel)}.{nameof(Std)}.{nameof(Std.OSRuntime)};",
+            $"using {nameof(XR)}.{nameof(Std)};",
+            $"using static {nameof(XR)}.{nameof(Std)}.{nameof(Std.Cli)};",
+            $"using static {nameof(XR)}.{nameof(Std)}.{nameof(Std.Net)};",
+            $"using static {nameof(XR)}.{nameof(Std)}.{nameof(Std.OSRuntime)};",
         };
 
         public static string MainBody(bool includeProgramClass = true, bool async = false)
