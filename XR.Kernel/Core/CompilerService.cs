@@ -9,8 +9,9 @@ using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using XR.Kernel.Extensions;
 using XR.Kernel.Logging;
-using XR.Kernel.Std;
+using XR.Std;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 
 namespace XR.Kernel.Core
 {
@@ -20,16 +21,16 @@ namespace XR.Kernel.Core
 
         public SourceDetail SourceDetail { get; private set; }
 
-        public CompilerService Build(string assemblyName, string location, params string[] moduleRef)
+        public CompilerService Build(string assemblyName, string location, bool useCsharpCode = false, params string[] moduleRef)
         {
             var buildWatch = new Stopwatch();
             buildWatch.Start();
 
             _logger.Info("Build Start");
 
-            string rawData = SourceParse.GetSourceFileRaw(location);
+            string rawData = SourceParse.GetSourceFileRaw(location, useCsharpCode);
 
-            string source = SourceParse.ParseFile(rawData);
+            string source = SourceParse.ParseFile(rawData, false);
 
             _logger.Info($"---- Source Code Generate ----:\n{source}");
 
@@ -122,42 +123,69 @@ namespace XR.Kernel.Core
 
         private static CSharpCompilation GenerateCode(string assemblyOrModuleName, string code, string[] assemblyRefs = null)
         {
-            SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, null, string.Empty);
+            var options = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp9);
+
+            _logger.Info("Code Syntax Parse...");
+            SyntaxTree syntaxTree = SyntaxFactory.ParseSyntaxTree(code, options);
+            _logger.Info("Code Syntax Parse = OK");
 
             if (assemblyRefs != null)
             {
                 foreach (var assemblyName in assemblyRefs)
                 {
                     var dllname = assemblyName;
+                    _logger.Info($"Loading: {dllname}");
+
                     if (dllname.Contains("%ProgramFiles(x86)%"))
                         dllname = assemblyName.Replace("%ProgramFiles(x86)%", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
                     if (dllname.Contains("%ProgramFiles%"))
                         dllname = assemblyName.Replace("%ProgramFiles%", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
 
-                    _logger.Info($"Loading: {dllname}");
                     Assembly.LoadFrom(dllname).GetReferencedAssemblies();
                 }
             }
 
             var domainAssemblys = AppDomain.CurrentDomain.GetAssemblies();
             var metadataReferenceList = new List<MetadataReference>();
+
             foreach (var assembl in domainAssemblys)
             {
-                if (assembl.Location.IsNull())
-                    continue;
-                var assemblyMetadata = AssemblyMetadata.CreateFromFile(assembl.Location);
-                _logger.Info($"{nameof(assemblyMetadata)}: {assembl.Location}");
-                var metadataReference = assemblyMetadata.GetReference();
-                metadataReferenceList.Add(metadataReference);
-            }
+                _logger.Info($"Loading: {assembl.GetName()}");
+                //if (!assembl.Location.IsNull())
+                //    _logger.Info($"Dll Location: {assembl.Location}");
 
-            // Add extra refs
-            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.Linq.Expressions.Expression).Assembly.Location));
-            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.ComponentModel.Component).Assembly.Location));
-            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(FileSystemWatcher).Assembly.Location));
-            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.Reactive.Observer).Assembly.Location));
-            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(System.Drawing.Bitmap).Assembly.Location));
-            metadataReferenceList.Add(MetadataReference.CreateFromFile(typeof(Process).Assembly.Location));
+                //if (assembl.Location.IsNull())
+                //    continue;
+                unsafe
+                {
+                    assembl.TryGetRawMetadata(out byte* blob, out int length);                    
+                    var moduleMetadata = ModuleMetadata.CreateFromMetadata((IntPtr)blob, length);
+                    var assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
+
+                    // Not work in Net 5.0 Self-Contained Single File, Cause 'Path' Exception
+                    //var assemblyMetadata = AssemblyMetadata.CreateFromFile(assembl.Location);
+                    var metadataReference = assemblyMetadata.GetReference();
+                    metadataReferenceList.Add(metadataReference);
+                }
+            }
+            unsafe
+            {
+                // Add extra refs
+                typeof(Process).Assembly.TryGetRawMetadata(out byte* blob, out int length);
+                typeof(FileSystemWatcher).Assembly.TryGetRawMetadata(out byte* blob2, out int length2);
+                typeof(System.Drawing.Bitmap).Assembly.TryGetRawMetadata(out byte* blob3, out int length3);
+                typeof(System.Reactive.Observer).Assembly.TryGetRawMetadata(out byte* blob4, out int length4);
+                typeof(System.ComponentModel.Component).Assembly.TryGetRawMetadata(out byte* blob5, out int length5);
+                typeof(System.Linq.Expressions.Expression).Assembly.TryGetRawMetadata(out byte* blob6, out int length6);
+
+                metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob, length)).GetReference());
+                metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob2, length2)).GetReference());
+                metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob3, length3)).GetReference());
+                metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob4, length4)).GetReference());
+                metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob5, length5)).GetReference());
+                metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob6, length6)).GetReference());
+
+            }
 
             // create and return the compilation
             CSharpCompilation compilation = CSharpCompilation.Create
@@ -167,7 +195,7 @@ namespace XR.Kernel.Core
                 options: new CSharpCompilationOptions(OutputKind.ConsoleApplication,
                    optimizationLevel: OptimizationLevel.Release,
                    assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default),
-                references: metadataReferenceList
+            references: metadataReferenceList
             );
 
             return compilation;

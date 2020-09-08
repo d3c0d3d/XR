@@ -1,8 +1,8 @@
 ﻿using System;
 using XR.Kernel;
 using XR.Kernel.OptionCommand;
-using static XR.Kernel.Std.Cli;
-using XR.Kernel.Std;
+using static XR.Std.Cli;
+using XR.Std;
 using XR.Kernel.Logging;
 using XR.Kernel.Core;
 using System.IO;
@@ -18,9 +18,9 @@ namespace XR.App
             PrintLnC($"{location} Compiling...",ConsoleColor.White);
 
             var fileName = Path.GetFileNameWithoutExtension(location);
-
+            
             _ = new CompilerService()
-                .Build(fileName, location,assembliesLocation)
+                .Build(fileName, location,Path.GetExtension(".cs") == ".cs",assembliesLocation)
                 .Run(args);
         }
 

@@ -1,4 +1,4 @@
-﻿using XR.Kernel.Extensions;
+﻿using XR.Extensions;
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 #endif
 
-namespace XR.Kernel.Std
+namespace XR.Std
 {
     public static class Cli
     {

@@ -3,8 +3,8 @@ using System.Linq;
 using XR.Kernel.Core;
 using XR.Kernel.Logging;
 using XR.Kernel.OptionCommand;
-using XR.Kernel.Std;
-using static XR.Kernel.Std.Cli;
+using XR.Std;
+using static XR.Std.Cli;
 
 namespace XR.App
 {
