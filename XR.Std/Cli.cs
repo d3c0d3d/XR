@@ -1,7 +1,7 @@
-﻿using XR.Extensions;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using XR.Std.Extensions;
 #if Windows
 using System.Windows.Forms;
 #endif

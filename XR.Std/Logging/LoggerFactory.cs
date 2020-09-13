@@ -1,4 +1,4 @@
-﻿namespace XR.Kernel.Logging
+﻿namespace XR.Std.Logging
 {
     public static class LoggerFactory
     {

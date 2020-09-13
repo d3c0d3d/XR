@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace XR.Kernel.OptionCommand
+namespace XR.Std.OptionCommand
 {
     public abstract class Option
     {

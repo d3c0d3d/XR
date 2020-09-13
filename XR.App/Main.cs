@@ -1,9 +1,9 @@
 ﻿using System;
 using XR.Kernel;
-using XR.Kernel.OptionCommand;
+using XR.Std.OptionCommand;
 using static XR.Std.Cli;
 using XR.Std;
-using XR.Kernel.Logging;
+using XR.Std.Logging;
 using XR.Kernel.Core;
 using System.IO;
 

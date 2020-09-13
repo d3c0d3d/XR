@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using XR.Kernel.Core;
-using XR.Kernel.Logging;
-using XR.Kernel.OptionCommand;
+using XR.Std.Logging;
+using XR.Std.OptionCommand;
 using XR.Std;
 using static XR.Std.Cli;
 

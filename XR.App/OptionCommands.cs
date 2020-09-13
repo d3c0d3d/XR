@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using XR.Kernel.Extensions;
-using XR.Kernel.OptionCommand;
+using XR.Std.Extensions;
+using XR.Std.OptionCommand;
 using XR.Std;
 
 namespace XR.App
@@ -9,7 +9,7 @@ namespace XR.App
     internal static class OptionCommands
     {
         private static OptionSet _optionSet;
-        internal static string _titleCache;
+        private static string _titleCache;
         private static string _fileRun;
         private static string[] _assembliesLocation;
         private static string[] _assemblyArgs;

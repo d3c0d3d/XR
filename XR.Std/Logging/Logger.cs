@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace XR.Kernel.Logging
+namespace XR.Std.Logging
 {
     /// <summary>
     /// Provides a set of methods and properties for logging.

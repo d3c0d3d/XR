@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using XR.Kernel.Extensions;
+using XR.Std.Extensions;
 using XR.Std;
 
 namespace XR.Kernel.Core
