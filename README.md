@@ -25,7 +25,7 @@ run=file.xr
 ![alt text](https://github.com/d3c0d3d/XR/raw/master/images/screenshot.png?raw=true)
 
 Experiment Code (file.xr)
-```
+```cs
 // Class A
 ImportFrom("https://pastebin.com/raw/4vT6zwj0");
 
