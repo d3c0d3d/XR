@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace XR.Kernel.OptionCommand
+namespace XR.Std.OptionCommand
 {
     public class OptionException : Exception
     {

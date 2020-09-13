@@ -7,11 +7,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using XR.Kernel.Extensions;
-using XR.Kernel.Logging;
 using XR.Std;
 using System.Diagnostics;
 using System.Reflection.Metadata;
+using XR.Std.Logging;
 
 namespace XR.Kernel.Core
 {

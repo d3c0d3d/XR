@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace XR.Kernel.Logging
+namespace XR.Std.Logging
 {
     /// <summary>
     /// Represents a log data used by the <see cref="Logger"/> class.

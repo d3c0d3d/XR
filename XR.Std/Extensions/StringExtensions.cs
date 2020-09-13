@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace XR.Extensions
+namespace XR.Std.Extensions
 {
     public static class StringExtensions
     {
@@ -124,8 +124,8 @@ namespace XR.Extensions
         {
             try
             {
-                var strLeft = str.Substring(0, withEllipsis ? (counter % 2 == 0 ? counter / 2 - 1 : (counter + 1) / 2 - 1) : (counter % 2 == 0 ? counter / 2 : (counter + 1) / 2));
-                var strRight = str.Substring(withEllipsis ? (str.Length - counter / 2) + 2 : (str.Length - counter / 2));
+                var strLeft = str.Substring(0, withEllipsis ? counter % 2 == 0 ? counter / 2 - 1 : (counter + 1) / 2 - 1 : counter % 2 == 0 ? counter / 2 : (counter + 1) / 2);
+                var strRight = str.Substring(withEllipsis ? str.Length - counter / 2 + 2 : str.Length - counter / 2);
 
                 return strLeft + (withEllipsis ? "..." : string.Empty) + strRight;
             }

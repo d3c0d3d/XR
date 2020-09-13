@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text;
-using XR.Extensions;
+using XR.Std.Extensions;
 
 namespace XR.Std
 {
