@@ -10,7 +10,7 @@ namespace XR.App
 {
     class Program
     {
-        public static readonly Logger _logger = LoggerFactory.CreateLogger(LogLevel.Info, Util.GetEnvLoggerFile(Kernel.Statics.XR_LOGGER_ENV));
+        public static readonly Logger _logger = LoggerFactory.CreateLogger(LogLevel.Info, Util.GetEnvLoggerFile(Kernel.Settings.XR_LOGGER_ENV));
 
         static void Main(string[] args)
         {

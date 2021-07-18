@@ -1,6 +1,6 @@
 ﻿namespace XR.Kernel
 {
-    public static class Statics
+    public static class Settings
     {
         // Env
         public const string XR_LOGGER_ENV = "XR_LOGGER";

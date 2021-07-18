@@ -16,7 +16,7 @@ namespace XR.Kernel.Core
 {
     public class CompilerService
     {
-        public static readonly Logger _logger = LoggerFactory.CreateLogger(LogLevel.Info, Util.GetEnvLoggerFile(Statics.XR_LOGGER_ENV));
+        public static readonly Logger _logger = LoggerFactory.CreateLogger(LogLevel.Info, Util.GetEnvLoggerFile(Settings.XR_LOGGER_ENV));
 
         public SourceDetail SourceDetail { get; private set; }
 
@@ -29,7 +29,7 @@ namespace XR.Kernel.Core
 
             string rawData = SourceParse.GetSourceFileRaw(location, useCsharpCode);
 
-            string source = SourceParse.ParseFile(rawData, false);
+            string source = SourceParse.ParseFile(rawData);
 
             _logger.Info($"---- Source Code Generate ----:\n{source}");
 
@@ -79,6 +79,7 @@ namespace XR.Kernel.Core
             using var asm = new MemoryStream(compiledAssembly);
             var assemblyLoadContext = new AssemblyLoaderContext();
             assemblyLoadContext.Resolving += AssemblyLoadContext_Resolving;
+            assemblyLoadContext.Unloading += AssemblyLoadContext_Unloading;
 
             var assembly = assemblyLoadContext.LoadFromStream(asm);
 
@@ -91,6 +92,11 @@ namespace XR.Kernel.Core
             assemblyLoadContext.Unload();
 
             return new WeakReference(assemblyLoadContext);
+        }
+
+        private static void AssemblyLoadContext_Unloading(AssemblyLoadContext context)
+        {
+            _logger.Info($"Unloading: {context.Name}");
         }
 
         private static Assembly AssemblyLoadContext_Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
@@ -176,6 +182,7 @@ namespace XR.Kernel.Core
                 typeof(System.Reactive.Observer).Assembly.TryGetRawMetadata(out byte* blob4, out int length4);
                 typeof(System.ComponentModel.Component).Assembly.TryGetRawMetadata(out byte* blob5, out int length5);
                 typeof(System.Linq.Expressions.Expression).Assembly.TryGetRawMetadata(out byte* blob6, out int length6);
+                typeof(System.Configuration.ConfigurationManager).Assembly.TryGetRawMetadata(out byte* blob7, out int length7);
 
                 metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob, length)).GetReference());
                 metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob2, length2)).GetReference());
@@ -183,6 +190,7 @@ namespace XR.Kernel.Core
                 metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob4, length4)).GetReference());
                 metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob5, length5)).GetReference());
                 metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob6, length6)).GetReference());
+                metadataReferenceList.Add(AssemblyMetadata.Create(ModuleMetadata.CreateFromMetadata((IntPtr)blob7, length7)).GetReference());
 
             }
 
