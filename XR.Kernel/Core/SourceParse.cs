@@ -4,13 +4,14 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using XR.Std.Extensions;
+using XR.Std.Net;
 using XR.Std;
 
 namespace XR.Kernel.Core
 {
     internal static class SourceParse
     {
-        internal static string ParseFile(string file, bool useCSharpCode)
+        internal static string ParseFile(string file)
         {
             // get from web or localpath
             var fullcode = ProcessImportFrom(file);
@@ -36,7 +37,7 @@ namespace XR.Kernel.Core
                 codeBuilder.AppendLine(classeContent);
             }
 
-            var methodsExtracts = Regex.Matches(cleanupFile, Statics.RegexMethodCodeBlock);
+            var methodsExtracts = Regex.Matches(cleanupFile, Settings.RegexMethodCodeBlock);
             string methodsList = null;
 
             foreach (var method in methodsExtracts)
@@ -48,13 +49,8 @@ namespace XR.Kernel.Core
             }
 
             cleanupFile = cleanupFile.Replace("\r\n\r\n\r", string.Empty);
-
-            string formatCode;
-            if (useCSharpCode)
-                formatCode = "{code}\n{methods}".Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
-            else
-                formatCode = Templates.MainBody(async: cleanupFile.Contains("await")).Replace("{code}", cleanupFile.Replace("\r\n", "\r\n         "));
-            formatCode = formatCode.Replace("{methods}", methodsList);
+            
+            var formatCode = Templates.MainBody(cleanupFile, methodsList, getClasses.Count > 0, async: cleanupFile.Contains("await"));            
 
             codeBuilder.AppendLine(formatCode);
 
@@ -63,20 +59,20 @@ namespace XR.Kernel.Core
 
         private static string ProcessImportFrom(string file)
         {
-            var matchs = Regex.Matches(file, Statics.RegexImportFrom);
+            var matchs = Regex.Matches(file, Settings.RegexImportFrom);
             if (matchs == null || matchs.Count == 0)
                 return file;
 
             foreach (var match in matchs)
             {
-                var url = match.ToString().Replace($"{Statics.ImportFromDefName}(", string.Empty)
+                var url = match.ToString().Replace($"{Settings.ImportFromDefName}(", string.Empty)
                     .Replace("\"", string.Empty)
                     .Replace("(", string.Empty)
                     .Replace(");", string.Empty);
 
                 var code = GetSourceFileRaw(url);
 
-                file = file.Replace(Regex.Match(file, Statics.RegexImportFrom).Value, code);
+                file = file.Replace(Regex.Match(file, Settings.RegexImportFrom).Value, code);
             }
 
             return file;
@@ -90,7 +86,7 @@ namespace XR.Kernel.Core
             {
                 Cli.PrintLnC($"{location} Downloading...", ConsoleColor.White);
 
-                file = Net.GetStringAsync(location).Result;
+                file = JsonTools.GetStringAsync(location).Result;
             }
             else
             {
@@ -128,7 +124,7 @@ namespace XR.Kernel.Core
         {
             List<string> UsingList = new List<string>();
 
-            var matchs = Regex.Matches(file, Statics.RegexUsings);
+            var matchs = Regex.Matches(file, Settings.RegexUsings);
 
             foreach (var match in matchs)
             {

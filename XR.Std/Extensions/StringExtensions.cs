@@ -29,6 +29,16 @@ namespace XR.Std.Extensions
             return str;
         }
 
+        public static string ToHex(this byte[] bytes, bool upperCase = false)
+        {
+            var result = new StringBuilder(bytes.Length * 2);
+
+            foreach (var t in bytes)
+                result.Append(t.ToString(upperCase ? "X2" : "x2"));
+
+            return result.ToString();
+        }
+
         /// <summary>
         /// Remove whitespace without exceptions
         /// </summary>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31512.422
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XR.App", "XR.App\XR.App.csproj", "{B0968552-C03A-4AE0-9D37-7F6686F2B6A8}"
 EndProject
@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{A3A4
 		Samples\watch.xr = Samples\watch.xr
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XR.Std", "XR.Std\XR.Std.csproj", "{63AB5E33-1FBE-4CF5-AB5B-AB8DB643B205}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XR.Std", "XR.Std\XR.Std.csproj", "{63AB5E33-1FBE-4CF5-AB5B-AB8DB643B205}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -11,7 +11,7 @@ namespace XR.App
 {
     internal class Main
     {
-        public static readonly Logger _logger = LoggerFactory.CreateLogger(LogLevel.Info, Util.GetEnvLoggerFile(Statics.XR_LOGGER_ENV));
+        public static readonly Logger _logger = LoggerFactory.CreateLogger(LogLevel.Info, Util.GetEnvLoggerFile(Settings.XR_LOGGER_ENV));
 
         internal static void RunFile(string location, string[] args,string[] assembliesLocation)
         {            

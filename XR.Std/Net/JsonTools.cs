@@ -1,12 +1,13 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XR.Std
+namespace XR.Std.Net
 {
-    public static class Net
+    public static class JsonTools
     {
         public static async Task<string> GetJsonAsync(string url)
         {
@@ -14,14 +15,42 @@ namespace XR.Std
         }
 
         public static async Task<string> GetStringAsync(string url)
-        {   
+        {
             return await GetRaw(url);
+        }
+
+        public static async Task<string> PostFormUrlStringAsync(string url, Dictionary<string, string> values)
+        {
+            return await PostRaw(url, values, true);
+        }
+
+        public static async Task<string> PostJsonStringAsync(string url, string json)
+        {
+            return await PostRaw(url, json, false);
         }
 
         private static async Task<string> GetRaw(string url)
         {
             using var httpClient = new HttpClient();
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            using var contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync();
+            contentStream.Position = 0;
+            var sr = new StreamReader(contentStream);
+            return sr.ReadToEnd();
+        }
+
+        private static async Task<string> PostRaw(string url, object content, bool isFormUrl)
+        {
+            using var httpClient = new HttpClient();
+            using var request = new HttpRequestMessage(HttpMethod.Post, url);
+            if (isFormUrl)
+            {
+                request.Content = new FormUrlEncodedContent(content as Dictionary<string, string>);
+            }
+            else
+            {
+                request.Content = new StringContent(content as string);
+            }
             using var contentStream = await (await httpClient.SendAsync(request)).Content.ReadAsStreamAsync();
             contentStream.Position = 0;
             var sr = new StreamReader(contentStream);
@@ -55,3 +84,4 @@ namespace XR.Std
         }
     }
 }
+

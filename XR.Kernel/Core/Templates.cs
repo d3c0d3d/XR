@@ -1,4 +1,5 @@
 ﻿using System;
+using XR.Std.Extensions;
 
 namespace XR.Kernel.Core
 {
@@ -16,22 +17,21 @@ namespace XR.Kernel.Core
             "using System.Collections.Generic;",
             $"using {nameof(XR)}.{nameof(Std)};",
             $"using static {nameof(XR)}.{nameof(Std)}.{nameof(Std.Cli)};",
-            $"using static {nameof(XR)}.{nameof(Std)}.{nameof(Std.Net)};",
             $"using static {nameof(XR)}.{nameof(Std)}.{nameof(Std.OSRuntime)};",
+            $"using static {nameof(XR)}.{nameof(Std)}.{nameof(Std.Net)}.{nameof(Std.Net.JsonTools)};"
         };
 
-        public static string MainBody(bool includeProgramClass = true, bool async = false)
+        public static string MainBody(string code, string methods = null, bool includeProgramClass = true, bool async = false)
         {
             if (includeProgramClass)
                 return $"public class Program{Environment.NewLine}" +
                     $"{{" +
                     $"   public static {(async ? "async Task" : "void")} Main(string[] args){Environment.NewLine}" +
                     $"    {{" +
-                    $"         {{code}}{Environment.NewLine}" +
-                    $"    }}{Environment.NewLine}" +
-                    $"    {{methods}}{Environment.NewLine}" +
-                    $"}}";
-            else return $"{{}}";
+                    $"         {Environment.NewLine}{code}{Environment.NewLine}" +
+                    $"    }}" +
+                    (!methods.IsNull() ? Environment.NewLine + methods + Environment.NewLine : string.Empty) + $"{Environment.NewLine}}}";
+            else return $"{code}{(!methods.IsNull() ? Environment.NewLine + methods : string.Empty)}";
         }
     }
 }

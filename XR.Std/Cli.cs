@@ -117,6 +117,19 @@ namespace XR.Std
             return ret;
         }
 
+        public static void WaitKey()
+        {
+            Console.ReadKey();
+        }
+
+        public class CliException : Exception
+        {
+            public CliException(string message) : base(message)
+            {
+
+            }
+        }
+
 #if Windows
 
         // P/Invoke declarations

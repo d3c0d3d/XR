@@ -1,11 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-	<IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
-	<IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
-	<IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;net46;net5.0</TargetFrameworks>
+		<LangVersion>9.0</LangVersion>
+		<IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+		<IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+		<IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
 		<OutputPath>..\build\Debug</OutputPath>
 	</PropertyGroup>
@@ -18,7 +19,10 @@
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
 		<OutputPath>..\build\Debug</OutputPath>
 	</PropertyGroup>
-	
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net46|AnyCPU'">
+		<OutputPath>..\build\Debug</OutputPath>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
 		<OutputPath>..\build\Release</OutputPath>
 	</PropertyGroup>
@@ -27,8 +31,11 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netcoreapp3.1|AnyCPU'">
 		<OutputPath>..\build\Release</OutputPath>
-	</PropertyGroup>	
+	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
+		<OutputPath>..\build\Release</OutputPath>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net46|AnyCPU'">
 		<OutputPath>..\build\Release</OutputPath>
 	</PropertyGroup>
 
@@ -42,11 +49,25 @@
 		<DefineConstants>Linux</DefineConstants>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Costura.Fody" Version="5.0.0-alpha0281">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="System.Collections.Immutable" Version="5.0.0-rc.1.20451.14" />
+		<PackageReference Include="System.Reactive" Version="4.4.1" />
+	</ItemGroup>
+
 	<ItemGroup Condition="'$(IsWindows)'=='true'">
 		<Reference Include="System.Windows.Forms">
 			<HintPath>C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.Windows.Forms.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
+	  <Reference Include="System.Data.DataSetExtensions">
+	    <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.DataSetExtensions.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
 
 </Project>
