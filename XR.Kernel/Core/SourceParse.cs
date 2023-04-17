@@ -122,7 +122,7 @@ namespace XR.Kernel.Core
 
         private static List<string> GetUsingsFromFile(string file)
         {
-            List<string> UsingList = new List<string>();
+            List<string> UsingList = new();
 
             var matchs = Regex.Matches(file, Settings.RegexUsings);
 

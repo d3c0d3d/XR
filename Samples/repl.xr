@@ -13,6 +13,10 @@ while (!quit)
         var c = ShellArgs();
         if(c?.Count() > 0 && c[0] == "-q")
             quit = true;
+        else if(c?.Count() > 0 && c[0] == "-guid")
+            PrintLn($"New Guid -> {Guid.NewGuid()}");
+        else if(c?.Count() > 0 && c[0] == "-timestamp")
+            PrintLn($"New UnixTimestamp -> {new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()}");
         else
             foreach(var r in c)
                 PrintLn($"Received -> {r}");

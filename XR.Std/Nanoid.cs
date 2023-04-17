@@ -7,7 +7,7 @@ namespace XR.Std
     public static class Nanoid
     {
         private const string DefaultAlphabet = "_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private static readonly CryptoRandom Random = new CryptoRandom();
+        private static readonly CryptoRandom Random = new();
         /// <summary>
         /// 
         /// </summary>
