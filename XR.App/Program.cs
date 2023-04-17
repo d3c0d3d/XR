@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using XR.Kernel.Core;
 using XR.Std.Logging;
 using XR.Std.OptionCommand;
@@ -25,7 +24,7 @@ namespace XR.App
         {
             SetTitle($"{Common.KIND_APPNAME} - {Common.KIND_VERSION}");
 
-            if (args?.Count() > 0)
+            if (args?.Length > 0)
             {
                 try
                 {
